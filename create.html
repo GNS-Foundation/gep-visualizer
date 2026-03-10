@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,139 +9,107 @@
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
+:root{--bg:#080c14;--bg2:rgba(0,174,239,.03);--bg3:rgba(0,0,0,.3);--text:#e0e6ed;--text2:#b0b8c1;--text3:#636E72;--text4:#4a5568;--border:rgba(0,174,239,.08);--border2:rgba(0,174,239,.12);--border3:rgba(0,174,239,.15);--accent:#00AEEF;--green:#51CF66;--yellow:#FFD43B;--red:#FF6B6B;--card:rgba(0,174,239,.03);--input-bg:rgba(255,255,255,.05);--gea-bg:rgba(0,174,239,.06);--shadow:none}
+[data-theme="light"]{--bg:#f5f7fa;--bg2:rgba(0,174,239,.04);--bg3:#fff;--text:#1a202c;--text2:#4a5568;--text3:#718096;--text4:#a0aec0;--border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.12);--border3:rgba(0,0,0,.15);--card:#fff;--input-bg:#fff;--gea-bg:rgba(0,174,239,.06);--shadow:0 1px 4px rgba(0,0,0,.08)}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#080c14;color:#e0e6ed;font-family:'JetBrains Mono',monospace;min-height:100vh}
-a{color:#00AEEF;text-decoration:none}a:hover{text-decoration:underline}
-button{font-family:inherit;cursor:pointer;transition:all .15s}button:hover{filter:brightness(1.15)}
-.container{max-width:720px;margin:0 auto;padding:20px 16px}
-.header{text-align:center;margin-bottom:24px}
-.header .badge{font-size:10px;letter-spacing:5px;color:#00AEEF;opacity:.6}
-.header h1{font-size:26px;font-weight:800;background:linear-gradient(135deg,#00AEEF,#51CF66);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:4px 0}
-.header p{font-size:12px;color:#636E72;max-width:500px;margin:4px auto 0;line-height:1.5}
-.step{background:rgba(0,174,239,.03);border:1px solid rgba(0,174,239,.08);border-radius:10px;padding:18px;margin-bottom:14px}
-.step-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.step-num{width:28px;height:28px;border-radius:50%;background:rgba(0,174,239,.15);color:#00AEEF;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
-.step-title{font-size:14px;font-weight:700}
-.field{margin-bottom:12px}
-.field label{display:block;font-size:9px;color:#636E72;letter-spacing:2px;margin-bottom:5px}
-.field input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(0,174,239,.12);color:#e0e6ed;padding:10px 12px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border .2s}
-.field input:focus{border-color:#00AEEF}
-.field .hint{font-size:10px;color:#4a5568;margin-top:4px}
-.search-results{background:#111820;border:1px solid rgba(0,174,239,.15);border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;display:none;position:absolute;left:0;right:0;z-index:100}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;transition:background .3s,color .3s}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+button{font-family:inherit;cursor:pointer;transition:all .15s}button:hover{filter:brightness(1.1)}
+.container{max-width:760px;margin:0 auto;padding:24px 18px}
+.theme-toggle{position:fixed;top:16px;right:16px;z-index:999;background:var(--card);border:1px solid var(--border2);border-radius:24px;padding:8px 14px;cursor:pointer;font-size:18px;box-shadow:var(--shadow);transition:all .3s}
+.theme-toggle:hover{transform:scale(1.1)}
+.header{text-align:center;margin-bottom:28px}
+.header .badge{font-size:12px;letter-spacing:5px;color:var(--accent);opacity:.7}
+.header h1{font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:6px 0}
+.header p{font-size:15px;color:var(--text3);max-width:520px;margin:6px auto 0;line-height:1.6}
+.step{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px;box-shadow:var(--shadow);transition:background .3s,border .3s}
+.step-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.step-num{width:32px;height:32px;border-radius:50%;background:rgba(0,174,239,.15);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0}
+.step-title{font-size:17px;font-weight:700}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;color:var(--text3);letter-spacing:2px;margin-bottom:6px}
+.field input{width:100%;background:var(--input-bg);border:1px solid var(--border2);color:var(--text);padding:12px 14px;border-radius:8px;font-size:15px;font-family:inherit;outline:none;transition:border .2s,background .3s}
+.field input:focus{border-color:var(--accent)}
+.field .hint{font-size:12px;color:var(--text4);margin-top:5px}
+.search-results{background:var(--bg3);border:1px solid var(--border3);border-radius:0 0 8px 8px;max-height:220px;overflow-y:auto;display:none;position:absolute;left:0;right:0;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.15)}
 .search-results.show{display:block}
-.search-results div{padding:10px 12px;font-size:12px;color:#b0b8c1;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.03)}
-.search-results div:hover{background:rgba(0,174,239,.1);color:#fff}
-#minimap{width:100%;height:200px;border-radius:8px;border:1px solid rgba(0,174,239,.1);margin:10px 0}
-.gea-box{background:rgba(0,174,239,.06);border:1px solid rgba(0,174,239,.12);border-radius:8px;padding:12px;text-align:center;margin:10px 0;word-break:break-all}
-.gea-box .lbl{font-size:8px;color:#636E72;letter-spacing:2px;margin-bottom:4px}
-.gea-box .val{font-size:12px;color:#00AEEF;font-weight:600}
-/* TXT Record display */
-.txt-record{background:rgba(0,0,0,.3);border:1px solid rgba(0,174,239,.15);border-radius:8px;padding:14px;margin:12px 0;position:relative}
-.txt-record .label{font-size:9px;color:#636E72;letter-spacing:1px;margin-bottom:6px}
-.txt-field{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
-.txt-field .key{font-size:10px;color:#FFD43B;min-width:50px;padding-top:2px}
-.txt-field .value{font-size:12px;color:#51CF66;word-break:break-all;flex:1}
-.copy-btn{position:absolute;top:10px;right:10px;background:rgba(0,174,239,.15);border:1px solid rgba(0,174,239,.2);color:#00AEEF;padding:4px 10px;border-radius:4px;font-size:10px}
-/* Buttons */
-.primary-btn{width:100%;padding:14px;background:linear-gradient(135deg,#00AEEF,#0088cc);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;letter-spacing:1px}
+.search-results div{padding:12px 14px;font-size:14px;color:var(--text2);cursor:pointer;border-bottom:1px solid var(--border)}
+.search-results div:hover{background:rgba(0,174,239,.1);color:var(--text)}
+#minimap{width:100%;height:220px;border-radius:10px;border:1px solid var(--border2);margin:12px 0}
+.gea-box{background:var(--gea-bg);border:1px solid var(--border2);border-radius:10px;padding:14px;text-align:center;margin:12px 0;word-break:break-all}
+.gea-box .lbl{font-size:10px;color:var(--text3);letter-spacing:2px;margin-bottom:5px}
+.gea-box .val{font-size:14px;color:var(--accent);font-weight:600}
+.txt-record{background:var(--bg3);border:1px solid var(--border3);border-radius:10px;padding:16px;margin:14px 0;position:relative}
+.txt-field{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.txt-field .key{font-size:12px;color:var(--yellow);min-width:55px;padding-top:2px}
+.txt-field .value{font-size:14px;color:var(--green);word-break:break-all;flex:1}
+.copy-btn{position:absolute;top:12px;right:12px;background:rgba(0,174,239,.15);border:1px solid rgba(0,174,239,.2);color:var(--accent);padding:5px 12px;border-radius:6px;font-size:12px}
+.res-group{display:flex;gap:8px;margin:10px 0}
+.res-btn{flex:1;padding:12px 6px;background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--text2);text-align:center;font-size:13px;cursor:pointer;transition:all .2s}
+.res-btn.active{background:rgba(0,174,239,.12);border-color:var(--accent);color:var(--text)}
+.res-btn .r{font-size:18px;font-weight:700;color:var(--accent);display:block}
+.primary-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--accent),#0088cc);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;letter-spacing:1px}
 .primary-btn:disabled{opacity:.4;cursor:not-allowed}
-.secondary-btn{width:100%;padding:12px;background:transparent;border:1px solid rgba(0,174,239,.3);color:#00AEEF;border-radius:10px;font-size:13px;font-weight:600;margin-top:8px}
-/* Loading */
-.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* Success */
-.success{text-align:center;padding:30px 0}
-.success .emoji{font-size:64px}
-.success h2{font-size:24px;margin:12px 0 4px}
-.success .site-title{font-size:20px;color:#00AEEF;margin-bottom:4px}
-.success .site-desc{font-size:12px;color:#b0b8c1;max-width:400px;margin:0 auto 16px;line-height:1.5}
-.success .domain-badge{display:inline-block;background:rgba(81,207,102,.1);border:1px solid rgba(81,207,102,.2);color:#51CF66;padding:6px 16px;border-radius:20px;font-size:13px;margin-bottom:16px}
-.success-btn{display:inline-block;padding:12px 28px;background:#00AEEF;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;margin:6px;cursor:pointer;font-family:inherit}
-.success-btn.outline{background:transparent;border:1px solid #00AEEF;color:#00AEEF}
-.success-btn.green{background:#51CF66}
-/* Upgrade nudge */
-.upgrade-box{background:rgba(255,212,59,.04);border:1px solid rgba(255,212,59,.15);border-radius:10px;padding:16px;margin:20px 0;text-align:center}
-.upgrade-box h3{color:#FFD43B;font-size:13px;margin-bottom:6px}
-.upgrade-box p{font-size:11px;color:#b0b8c1;line-height:1.5}
-/* Error */
-.error-box{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);border-radius:8px;padding:12px;color:#FF6B6B;font-size:12px;margin-bottom:12px;display:none}
-.footer{text-align:center;margin-top:24px;font-size:9px;color:#2d3748;line-height:1.8}
-/* Res buttons */
-.res-group{display:flex;gap:6px;margin:8px 0}
-.res-btn{flex:1;padding:8px 4px;background:transparent;border:1px solid rgba(0,174,239,.12);border-radius:8px;color:#b0b8c1;text-align:center;font-size:10px;cursor:pointer}
-.res-btn.active{background:rgba(0,174,239,.12);border-color:#00AEEF;color:#fff}
-.res-btn .r{font-size:15px;font-weight:700;color:#00AEEF;display:block}
+.success{text-align:center;padding:36px 0}
+.success .emoji{font-size:72px}
+.success h2{font-size:28px;margin:14px 0 6px}
+.success .site-title{font-size:22px;color:var(--accent);margin-bottom:6px}
+.success .site-desc{font-size:14px;color:var(--text2);max-width:440px;margin:0 auto 18px;line-height:1.6}
+.success .domain-badge{display:inline-block;background:rgba(81,207,102,.1);border:1px solid rgba(81,207,102,.2);color:var(--green);padding:8px 20px;border-radius:24px;font-size:15px;margin-bottom:18px}
+.success-btn{display:inline-block;padding:14px 32px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;margin:8px;cursor:pointer;font-family:inherit}
+.success-btn.outline{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.success-btn.green{background:var(--green)}
+.upgrade-box{background:rgba(255,212,59,.04);border:1px solid rgba(255,212,59,.15);border-radius:12px;padding:20px;margin:24px 0;text-align:center}
+.upgrade-box h3{color:var(--yellow);font-size:15px;margin-bottom:8px}
+.upgrade-box p{font-size:13px;color:var(--text2);line-height:1.6}
+.upgrade-box code{color:var(--accent);background:rgba(0,174,239,.08);padding:2px 6px;border-radius:3px}
+.error-box{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);border-radius:10px;padding:14px;color:var(--red);font-size:14px;margin-bottom:14px;display:none}
+.footer{text-align:center;margin-top:28px;font-size:11px;color:var(--text4);line-height:2}
 </style>
 </head>
 <body>
+<div class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">🌙</div>
 <div class="container">
   <div class="header">
     <div class="badge">GEOEPOCH PROTOCOL</div>
     <h1>Create GEPSite</h1>
     <p>Give your business a permanent address on the Physical Web. One DNS record. No signup needed.</p>
   </div>
-
-  <!-- ═══ FORM ═══ -->
   <div id="formView">
-
-    <!-- STEP 1: DOMAIN -->
     <div class="step">
       <div class="step-header"><div class="step-num">1</div><div class="step-title">Your Domain</div></div>
-      <div class="field">
-        <label>WEBSITE DOMAIN</label>
-        <input type="text" id="domainInput" placeholder="mybusiness.com" autocomplete="off" spellcheck="false">
-        <div class="hint">Your existing website domain — no https:// needed</div>
-      </div>
+      <div class="field"><label>WEBSITE DOMAIN</label><input type="text" id="domainInput" placeholder="mybusiness.com" autocomplete="off" spellcheck="false"><div class="hint">Your existing website domain — no https:// needed</div></div>
     </div>
-
-    <!-- STEP 2: LOCATION -->
     <div class="step">
       <div class="step-header"><div class="step-num">2</div><div class="step-title">Business Location</div></div>
-      <div class="field" style="position:relative">
-        <label>SEARCH YOUR ADDRESS</label>
-        <input type="text" id="locSearch" placeholder="Via Gaetano Sacchi 16, Roma..." autocomplete="off">
-        <div class="search-results" id="locResults"></div>
-      </div>
+      <div class="field" style="position:relative"><label>SEARCH YOUR ADDRESS</label><input type="text" id="locSearch" placeholder="Via Gaetano Sacchi 16, Roma..." autocomplete="off"><div class="search-results" id="locResults"></div></div>
       <div id="minimap"></div>
-      <div class="field">
-        <label>PRECISION</label>
+      <div class="field"><label>PRECISION</label>
         <div class="res-group">
           <div class="res-btn" data-res="7" onclick="setRes(7)"><span class="r">R7</span>Area · 5 km²</div>
           <div class="res-btn" data-res="9" onclick="setRes(9)"><span class="r">R9</span>Building · 105K m²</div>
           <div class="res-btn active" data-res="10" onclick="setRes(10)"><span class="r">R10</span>Address · 15K m²</div>
         </div>
       </div>
-      <div class="gea-box" id="geaBox" style="display:none">
-        <div class="lbl">YOUR GEOEPOCH ADDRESS</div>
-        <div class="val" id="geaDisplay"></div>
-      </div>
+      <div class="gea-box" id="geaBox" style="display:none"><div class="lbl">YOUR GEOEPOCH ADDRESS</div><div class="val" id="geaDisplay"></div></div>
     </div>
-
-    <!-- STEP 3: DNS RECORD -->
     <div class="step" id="step3" style="display:none">
       <div class="step-header"><div class="step-num">3</div><div class="step-title">Add DNS Record</div></div>
-      <p style="font-size:12px;color:#b0b8c1;margin-bottom:12px">Add this TXT record in your DNS provider (Cloudflare, GoDaddy, Namecheap, etc.):</p>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:14px">Add this TXT record in your DNS provider (Cloudflare, GoDaddy, Namecheap, etc.):</p>
       <div class="txt-record" id="txtRecordBox">
         <button class="copy-btn" onclick="copyTxt()">Copy</button>
         <div class="txt-field"><span class="key">Type:</span><span class="value">TXT</span></div>
         <div class="txt-field"><span class="key">Host:</span><span class="value" id="txtHost">_gep</span></div>
         <div class="txt-field"><span class="key">Value:</span><span class="value" id="txtValue"></span></div>
       </div>
-      <p style="font-size:10px;color:#4a5568;margin-top:8px">DNS changes usually take 1-5 minutes to propagate.</p>
+      <p style="font-size:12px;color:var(--text4);margin-top:10px">DNS changes usually take 1-5 minutes to propagate.</p>
     </div>
-
-    <!-- ERROR -->
     <div class="error-box" id="errorBox"></div>
-
-    <!-- VERIFY BUTTON -->
-    <button class="primary-btn" id="verifyBtn" onclick="verify()" disabled>
-      VERIFY & CREATE GEPSITE
-    </button>
-    <p style="text-align:center;font-size:10px;color:#4a5568;margin-top:8px">We'll check your DNS record and auto-generate your GEPSite</p>
-
+    <button class="primary-btn" id="verifyBtn" onclick="verify()" disabled>VERIFY & CREATE GEPSITE</button>
+    <p style="text-align:center;font-size:12px;color:var(--text4);margin-top:10px">We'll check your DNS record and auto-generate your GEPSite</p>
   </div>
-
-  <!-- ═══ SUCCESS ═══ -->
   <div id="successView" style="display:none">
     <div class="success">
       <div class="emoji">🌍</div>
@@ -149,185 +117,50 @@ button{font-family:inherit;cursor:pointer;transition:all .15s}button:hover{filte
       <div class="site-title" id="successTitle"></div>
       <div class="site-desc" id="successDesc"></div>
       <div class="domain-badge" id="successDomain">✓ DNS Verified</div>
-      <div class="gea-box" style="margin:16px auto;max-width:500px">
-        <div class="lbl">GEOEPOCH ADDRESS</div>
-        <div class="val" id="successGea"></div>
-      </div>
-
-      <div style="margin:20px 0">
+      <div class="gea-box" style="margin:18px auto;max-width:520px"><div class="lbl">GEOEPOCH ADDRESS</div><div class="val" id="successGea"></div></div>
+      <div style="margin:24px 0">
         <button class="success-btn green" onclick="viewOnWeb()">VIEW ON PHYSICAL WEB</button>
         <button class="success-btn outline" onclick="copyGea()">COPY GEA</button>
       </div>
-
       <div class="upgrade-box">
         <h3>🚀 Upgrade to Sovereign Claim</h3>
         <p>Your GEPSite is live with a <strong>Provisional</strong> claim (DNS-verified, no physical presence proof yet).<br><br>
-        To get the full <strong>✓ Sovereign</strong> badge, download the <a href="https://gcrumbs.com" target="_blank">GCRUMBS app</a>, create your GNS identity, and drop a breadcrumb at your business location. Then add <code style="color:#00AEEF">pk=YOUR_PUBLIC_KEY</code> to your TXT record.</p>
+        To get the full <strong>✓ Sovereign</strong> badge, download the <a href="https://gcrumbs.com" target="_blank">GCRUMBS app</a>, create your GNS identity, and drop a breadcrumb at your business location. Then add <code>pk=YOUR_PUBLIC_KEY</code> to your TXT record.</p>
       </div>
-
       <button class="success-btn outline" onclick="location.reload()">CREATE ANOTHER</button>
     </div>
   </div>
-
-  <div class="footer">
-    GEP v1 · GNS Foundation / ULISSY s.r.l.<br>
-    <a href="https://gep.gcrumbs.com">Route Visualizer</a> ·
-    <a href="https://github.com/GNS-Foundation/gep-core">GitHub</a> ·
-    <a href="https://gcrumbs.com">GCRUMBS</a> ·
-    <a href="/create.html" style="color:#51CF66;font-weight:700">+ Manual Create</a>
-  </div>
+  <div class="footer">GEP v1 · GNS Foundation / ULISSY s.r.l.<br><a href="https://gep.gcrumbs.com">Route Visualizer</a> · <a href="https://github.com/GNS-Foundation/gep-core">GitHub</a> · <a href="https://gcrumbs.com">GCRUMBS</a></div>
 </div>
-
 <script>
-function loadScript(url, cb){var s=document.createElement('script');s.src=url;s.onload=cb;document.head.appendChild(s);}
-loadScript('https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js', initApp);
-
+function toggleTheme(){var h=document.documentElement,c=h.getAttribute('data-theme'),n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);document.getElementById('themeBtn').textContent=n==='dark'?'🌙':'☀️';localStorage.setItem('gep-theme',n);if(window._map)window._map.setStyle(n==='dark'?'mapbox://styles/mapbox/dark-v11':'mapbox://styles/mapbox/light-v11');}
+var saved=localStorage.getItem('gep-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);document.getElementById('themeBtn').textContent=saved==='dark'?'🌙':'☀️';}
+function loadScript(u,cb){var s=document.createElement('script');s.src=u;s.onload=cb;document.head.appendChild(s);}
+loadScript('https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js',initApp);
 function initApp(){
-
-var API='https://gns-browser-production.up.railway.app';
-var MBTOKEN='pk.eyJ1IjoiY2F5ZXJiZSIsImEiOiJjbW1hc2NoNnMwZmRxMnFyNGR0NG5lZHBqIn0.Nm2v5gzYR_qymV1FTdWgkQ';
+var API='https://gns-browser-production.up.railway.app',MBTOKEN='pk.eyJ1IjoiY2F5ZXJiZSIsImEiOiJjbW1hc2NoNnMwZmRxMnFyNGR0NG5lZHBqIn0.Nm2v5gzYR_qymV1FTdWgkQ';
 mapboxgl.accessToken=MBTOKEN;
-
-var state={lat:null,lon:null,res:10,domain:'',gea:null,marker:null,txtValue:'',result:null};
-
-// Map
-var map=new mapboxgl.Map({container:'minimap',style:'mapbox://styles/mapbox/dark-v11',center:[12.47,41.89],zoom:5,projection:'globe'});
+var S={lat:null,lon:null,res:10,domain:'',gea:null,marker:null,txtValue:'',result:null};
+var theme=document.documentElement.getAttribute('data-theme')||'dark';
+var map=new mapboxgl.Map({container:'minimap',style:theme==='dark'?'mapbox://styles/mapbox/dark-v11':'mapbox://styles/mapbox/light-v11',center:[12.47,41.89],zoom:5,projection:'globe'});
+window._map=map;
 map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'top-right');
-map.on('style.load',function(){map.setFog({color:'#080c14','high-color':'#0d1520','horizon-blend':0.04,'space-color':'#080c14','star-intensity':0.25});});
-map.on('click',function(e){setLocation(e.lngLat.lat,e.lngLat.lng,'Clicked location');});
-
-// Search
-var searchTO=null;
-var locInput=document.getElementById('locSearch');
-var locResults=document.getElementById('locResults');
-locInput.addEventListener('input',function(){
-  clearTimeout(searchTO);var q=locInput.value.trim();
-  if(q.length<3){locResults.classList.remove('show');return;}
-  searchTO=setTimeout(function(){
-    fetch('https://api.mapbox.com/geocoding/v5/mapbox.places/'+encodeURIComponent(q)+'.json?access_token='+MBTOKEN+'&limit=5')
-    .then(function(r){return r.json()}).then(function(d){
-      locResults.innerHTML='';
-      if(d.features&&d.features.length){
-        d.features.forEach(function(f){
-          var div=document.createElement('div');div.textContent=f.place_name;
-          div.onclick=function(){locInput.value=f.place_name;locResults.classList.remove('show');setLocation(f.center[1],f.center[0],f.place_name);};
-          locResults.appendChild(div);
-        });locResults.classList.add('show');
-      }else locResults.classList.remove('show');
-    }).catch(function(){locResults.classList.remove('show');});
-  },300);
-});
-locInput.addEventListener('blur',function(){setTimeout(function(){locResults.classList.remove('show')},200)});
-
-function setLocation(lat,lon,name){
-  state.lat=lat;state.lon=lon;
-  if(state.marker)state.marker.remove();
-  var el=document.createElement('div');el.style.cssText='width:16px;height:16px;border-radius:50%;background:#00AEEF;box-shadow:0 0 12px #00AEEF;border:2px solid #fff';
-  state.marker=new mapboxgl.Marker({element:el}).setLngLat([lon,lat]).addTo(map);
-  map.flyTo({center:[lon,lat],zoom:15,duration:800});
-  updateGea();
-  checkReady();
+map.on('style.load',function(){var t=document.documentElement.getAttribute('data-theme')||'dark';if(t==='dark')map.setFog({color:'#080c14','high-color':'#0d1520','horizon-blend':0.04,'space-color':'#080c14','star-intensity':0.25});if(S.lat&&S.marker){S.marker.remove();var el=document.createElement('div');el.style.cssText='width:16px;height:16px;border-radius:50%;background:#00AEEF;box-shadow:0 0 12px #00AEEF;border:2px solid #fff';S.marker=new mapboxgl.Marker({element:el}).setLngLat([S.lon,S.lat]).addTo(map);}});
+map.on('click',function(e){setLoc(e.lngLat.lat,e.lngLat.lng);});
+var sTO=null,lI=document.getElementById('locSearch'),lR=document.getElementById('locResults');
+lI.addEventListener('input',function(){clearTimeout(sTO);var q=lI.value.trim();if(q.length<3){lR.classList.remove('show');return;}sTO=setTimeout(function(){fetch('https://api.mapbox.com/geocoding/v5/mapbox.places/'+encodeURIComponent(q)+'.json?access_token='+MBTOKEN+'&limit=5').then(function(r){return r.json()}).then(function(d){lR.innerHTML='';if(d.features&&d.features.length){d.features.forEach(function(f){var div=document.createElement('div');div.textContent=f.place_name;div.onclick=function(){lI.value=f.place_name;lR.classList.remove('show');setLoc(f.center[1],f.center[0]);};lR.appendChild(div);});lR.classList.add('show');}else lR.classList.remove('show');}).catch(function(){lR.classList.remove('show');});},300);});
+lI.addEventListener('blur',function(){setTimeout(function(){lR.classList.remove('show')},200)});
+function setLoc(lat,lon){S.lat=lat;S.lon=lon;if(S.marker)S.marker.remove();var el=document.createElement('div');el.style.cssText='width:16px;height:16px;border-radius:50%;background:#00AEEF;box-shadow:0 0 12px #00AEEF;border:2px solid #fff';S.marker=new mapboxgl.Marker({element:el}).setLngLat([lon,lat]).addTo(map);map.flyTo({center:[lon,lat],zoom:15,duration:800});upGea();chk();}
+function upGea(){if(!S.lat)return;fetch(API+'/gep/address?lat='+S.lat+'&lon='+S.lon+'&resolution='+S.res).then(function(r){return r.json()}).then(function(d){if(d.success){S.gea=d.data.gea;document.getElementById('geaBox').style.display='block';document.getElementById('geaDisplay').textContent=d.data.gea;upTxt();}}).catch(function(){});}
+function upTxt(){if(!S.lat||!S.domain)return;var t='v=gep1; lat='+S.lat.toFixed(6)+'; lon='+S.lon.toFixed(6)+'; res='+S.res;S.txtValue=t;document.getElementById('txtHost').textContent='_gep.'+S.domain;document.getElementById('txtValue').textContent=t;document.getElementById('step3').style.display='block';}
+window.setRes=function(r){S.res=r;document.querySelectorAll('.res-btn').forEach(function(b){b.classList.remove('active')});document.querySelector('.res-btn[data-res="'+r+'"]').classList.add('active');upGea();};
+document.getElementById('domainInput').addEventListener('input',function(){S.domain=this.value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'');upTxt();chk();});
+function chk(){document.getElementById('verifyBtn').disabled=!(S.lat&&S.domain&&S.domain.includes('.'));}
+window.copyTxt=function(){navigator.clipboard.writeText(S.txtValue);var b=document.querySelector('.copy-btn');b.textContent='Copied!';setTimeout(function(){b.textContent='Copy'},1500);};
+window.verify=function(){if(!S.domain||!S.lat)return;var b=document.getElementById('verifyBtn');b.disabled=true;b.innerHTML='<span class="spinner"></span> VERIFYING DNS...';document.getElementById('errorBox').style.display='none';fetch(API+'/gep/domain/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain:S.domain})}).then(function(r){return r.json()}).then(function(d){if(d.success&&d.data.verified){S.result=d.data;document.getElementById('formView').style.display='none';document.getElementById('successView').style.display='block';document.getElementById('successTitle').textContent=d.data.site.title;document.getElementById('successDesc').textContent=d.data.site.description||'';document.getElementById('successDomain').textContent='✓ '+d.data.domain+' — DNS Verified';document.getElementById('successGea').textContent=d.data.gea;}else{var r2=d.data?d.data.reason||d.error:'Failed';document.getElementById('errorBox').textContent=r2;document.getElementById('errorBox').style.display='block';b.disabled=false;b.textContent='VERIFY & CREATE GEPSITE';}}).catch(function(e){document.getElementById('errorBox').textContent='Network error: '+e.message;document.getElementById('errorBox').style.display='block';b.disabled=false;b.textContent='VERIFY & CREATE GEPSITE';});};
+window.viewOnWeb=function(){if(S.result)window.open(API+'/gep/web/lookup?lat='+S.lat+'&lon='+S.lon+'&resolution='+S.res,'_blank');};
+window.copyGea=function(){if(S.result)navigator.clipboard.writeText(S.result.gea);var b=document.querySelectorAll('.success-btn.outline');b[0].textContent='COPIED!';setTimeout(function(){b[0].textContent='COPY GEA'},1500);};
 }
-
-function updateGea(){
-  if(!state.lat)return;
-  fetch(API+'/gep/address?lat='+state.lat+'&lon='+state.lon+'&resolution='+state.res)
-  .then(function(r){return r.json()}).then(function(d){
-    if(d.success){
-      state.gea=d.data.gea;
-      document.getElementById('geaBox').style.display='block';
-      document.getElementById('geaDisplay').textContent=d.data.gea;
-      updateTxtRecord();
-    }
-  }).catch(function(){});
-}
-
-function updateTxtRecord(){
-  if(!state.lat||!state.domain)return;
-  var txt='v=gep1; lat='+state.lat.toFixed(6)+'; lon='+state.lon.toFixed(6)+'; res='+state.res;
-  state.txtValue=txt;
-  document.getElementById('txtHost').textContent='_gep.'+state.domain;
-  document.getElementById('txtValue').textContent=txt;
-  document.getElementById('step3').style.display='block';
-}
-
-window.setRes=function(r){
-  state.res=r;
-  document.querySelectorAll('.res-btn').forEach(function(b){b.classList.remove('active')});
-  document.querySelector('.res-btn[data-res="'+r+'"]').classList.add('active');
-  updateGea();
-};
-
-// Domain input
-document.getElementById('domainInput').addEventListener('input',function(){
-  state.domain=this.value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
-  updateTxtRecord();
-  checkReady();
-});
-
-function checkReady(){
-  var ready=state.lat&&state.domain&&state.domain.includes('.');
-  document.getElementById('verifyBtn').disabled=!ready;
-}
-
-window.copyTxt=function(){
-  var text='Host: _gep.'+state.domain+'\nType: TXT\nValue: '+state.txtValue;
-  navigator.clipboard.writeText(state.txtValue);
-  var btn=document.querySelector('.copy-btn');btn.textContent='Copied!';
-  setTimeout(function(){btn.textContent='Copy'},1500);
-};
-
-// Verify
-window.verify=function(){
-  if(!state.domain||!state.lat)return;
-  var btn=document.getElementById('verifyBtn');
-  btn.disabled=true;
-  btn.innerHTML='<span class="spinner"></span> VERIFYING DNS...';
-  document.getElementById('errorBox').style.display='none';
-
-  fetch(API+'/gep/domain/verify',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({domain:state.domain})
-  })
-  .then(function(r){return r.json()})
-  .then(function(d){
-    if(d.success&&d.data.verified){
-      state.result=d.data;
-      document.getElementById('formView').style.display='none';
-      document.getElementById('successView').style.display='block';
-      document.getElementById('successTitle').textContent=d.data.site.title;
-      document.getElementById('successDesc').textContent=d.data.site.description||'';
-      document.getElementById('successDomain').textContent='✓ '+d.data.domain+' — DNS Verified';
-      document.getElementById('successGea').textContent=d.data.gea;
-    }else{
-      var reason=d.data?d.data.reason||d.error:'Verification failed';
-      document.getElementById('errorBox').textContent=reason;
-      document.getElementById('errorBox').style.display='block';
-      btn.disabled=false;
-      btn.textContent='VERIFY & CREATE GEPSITE';
-    }
-  })
-  .catch(function(e){
-    document.getElementById('errorBox').textContent='Network error: '+e.message;
-    document.getElementById('errorBox').style.display='block';
-    btn.disabled=false;
-    btn.textContent='VERIFY & CREATE GEPSITE';
-  });
-};
-
-window.viewOnWeb=function(){
-  if(state.result)window.open(API+'/gep/web/lookup?lat='+state.lat+'&lon='+state.lon+'&resolution='+state.res,'_blank');
-};
-
-window.copyGea=function(){
-  if(state.result)navigator.clipboard.writeText(state.result.gea);
-  var btns=document.querySelectorAll('.success-btn.outline');
-  btns[0].textContent='COPIED!';
-  setTimeout(function(){btns[0].textContent='COPY GEA'},1500);
-};
-
-} // end initApp
 </script>
 </body>
 </html>
