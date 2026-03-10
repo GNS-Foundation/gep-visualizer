@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create GEPSite — GeoEpoch Protocol</title>
+<meta name="description" content="Create a GEPSite — a website that is a place. No domain needed. Just your presence.">
+<meta property="og:title" content="Create GEPSite — GeoEpoch Protocol">
+<meta property="og:description" content="Publish content at any location on Earth. Your presence is the proof.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#080c14;color:#e0e6ed;font-family:'JetBrains Mono',monospace;min-height:100vh}
+a{color:#00AEEF;text-decoration:none}a:hover{text-decoration:underline}
+button{font-family:inherit;cursor:pointer;transition:all .15s}button:hover{filter:brightness(1.15)}
+.container{max-width:720px;margin:0 auto;padding:20px 16px}
+.header{text-align:center;margin-bottom:20px}
+.header .badge{font-size:10px;letter-spacing:5px;color:#00AEEF;opacity:.6}
+.header h1{font-size:26px;font-weight:800;background:linear-gradient(135deg,#00AEEF,#51CF66);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:4px 0}
+.header p{font-size:11px;color:#636E72}
+/* Steps */
+.step{background:rgba(0,174,239,.03);border:1px solid rgba(0,174,239,.08);border-radius:10px;padding:18px;margin-bottom:14px}
+.step-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.step-num{width:28px;height:28px;border-radius:50%;background:rgba(0,174,239,.15);color:#00AEEF;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.step-title{font-size:14px;font-weight:700;color:#e0e6ed}
+/* Inputs */
+.field{margin-bottom:12px}
+.field label{display:block;font-size:9px;color:#636E72;letter-spacing:2px;margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(0,174,239,.12);color:#e0e6ed;padding:10px 12px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border .2s}
+.field input:focus,.field textarea:focus{border-color:#00AEEF}
+.field textarea{resize:vertical;min-height:80px}
+.field .hint{font-size:10px;color:#4a5568;margin-top:4px}
+/* Search results */
+.search-results{background:#111820;border:1px solid rgba(0,174,239,.15);border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;display:none;position:absolute;left:0;right:0;z-index:100}
+.search-results.show{display:block}
+.search-results div{padding:10px 12px;font-size:12px;color:#b0b8c1;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.03)}
+.search-results div:hover{background:rgba(0,174,239,.1);color:#fff}
+/* Map */
+#minimap{width:100%;height:200px;border-radius:8px;border:1px solid rgba(0,174,239,.1);margin:10px 0}
+/* GEA display */
+.gea-box{background:rgba(0,174,239,.06);border:1px solid rgba(0,174,239,.12);border-radius:8px;padding:12px;text-align:center;margin:10px 0;word-break:break-all}
+.gea-box .lbl{font-size:8px;color:#636E72;letter-spacing:2px;margin-bottom:4px}
+.gea-box .val{font-size:12px;color:#00AEEF;font-weight:600}
+/* Resolution buttons */
+.res-group{display:flex;gap:6px;margin:8px 0}
+.res-btn{flex:1;padding:10px 6px;background:transparent;border:1px solid rgba(0,174,239,.12);border-radius:8px;color:#b0b8c1;text-align:center;font-size:11px}
+.res-btn.active{background:rgba(0,174,239,.12);border-color:#00AEEF;color:#fff}
+.res-btn .r{font-size:16px;font-weight:700;color:#00AEEF;display:block}
+/* Tier cards */
+.tier-card{padding:12px;border:1px solid rgba(0,174,239,.1);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px}
+.tier-card:hover{border-color:rgba(0,174,239,.3)}
+.tier-card.active{background:rgba(0,174,239,.08);border-color:#00AEEF}
+.tier-card.disabled{opacity:.35;cursor:not-allowed}
+.tier-emoji{font-size:24px}
+.tier-info{flex:1}
+.tier-name{font-weight:700;font-size:13px}
+.tier-desc{font-size:10px;color:#636E72;margin-top:2px}
+.tier-check{color:#00AEEF;font-size:18px}
+/* Submit */
+.submit-btn{width:100%;padding:14px;background:linear-gradient(135deg,#00AEEF,#0088cc);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;letter-spacing:1px}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed}
+/* Success */
+.success{text-align:center;padding:40px 0}
+.success .emoji{font-size:64px}
+.success h2{font-size:22px;margin:12px 0 4px}
+.success .title{font-size:18px;color:#00AEEF}
+.success-btn{display:inline-block;padding:12px 28px;background:#00AEEF;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;margin:8px 4px;cursor:pointer;font-family:inherit}
+.success-btn.outline{background:transparent;border:1px solid #00AEEF;color:#00AEEF}
+/* Error */
+.error-box{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);border-radius:8px;padding:12px;color:#FF6B6B;font-size:12px;margin-bottom:12px}
+.footer{text-align:center;margin-top:24px;font-size:9px;color:#2d3748;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">GEOEPOCH PROTOCOL</div>
+    <h1>Create GEPSite</h1>
+    <p>A website that is a place. No domain needed. Just your presence.</p>
+  </div>
+
+  <!-- FORM -->
+  <div id="formView">
+
+    <!-- STEP 1: LOCATION -->
+    <div class="step">
+      <div class="step-header"><div class="step-num">1</div><div class="step-title">Choose Location</div></div>
+      <div class="field" style="position:relative">
+        <label>SEARCH ADDRESS OR PLACE</label>
+        <input type="text" id="locSearch" placeholder="Via Gaetano Sacchi 16, Roma...">
+        <div class="search-results" id="locResults"></div>
+      </div>
+      <div id="minimap"></div>
+      <div class="gea-box" id="geaBox" style="display:none">
+        <div class="lbl">GEOEPOCH ADDRESS</div>
+        <div class="val" id="geaDisplay"></div>
+      </div>
+      <div class="field">
+        <label>PRECISION</label>
+        <div class="res-group">
+          <div class="res-btn" data-res="7" onclick="setRes(7)"><span class="r">R7</span>Neighborhood<br>5.16 km²</div>
+          <div class="res-btn" data-res="9" onclick="setRes(9)"><span class="r">R9</span>Building<br>105K m²</div>
+          <div class="res-btn active" data-res="10" onclick="setRes(10)"><span class="r">R10</span>Street<br>15K m²</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: CLAIM TYPE -->
+    <div class="step">
+      <div class="step-header"><div class="step-num">2</div><div class="step-title">Claim Type</div></div>
+      <div class="tier-card active" data-tier="visitor" onclick="setTier('visitor')">
+        <div class="tier-emoji">👤</div>
+        <div class="tier-info"><div class="tier-name">Visitor Review</div><div class="tier-desc">Post a review or message at this place</div></div>
+        <div class="tier-check" id="check-visitor">✓</div>
+      </div>
+      <div class="tier-card" data-tier="resident" onclick="setTier('resident')">
+        <div class="tier-emoji">🏠</div>
+        <div class="tier-info"><div class="tier-name">Resident GEPSite</div><div class="tier-desc">Create a persistent page — menu, contact, info</div></div>
+        <div class="tier-check" id="check-resident" style="display:none">✓</div>
+      </div>
+      <div class="tier-card" data-tier="sovereign" onclick="setTier('sovereign')">
+        <div class="tier-emoji">👑</div>
+        <div class="tier-info"><div class="tier-name">Sovereign Claim</div><div class="tier-desc">Official presence with DNS verification</div></div>
+        <div class="tier-check" id="check-sovereign" style="display:none">✓</div>
+      </div>
+    </div>
+
+    <!-- STEP 3: CONTENT -->
+    <div class="step">
+      <div class="step-header"><div class="step-num">3</div><div class="step-title">Content</div></div>
+      <div class="field">
+        <label>TITLE</label>
+        <input type="text" id="titleInput" placeholder="My Business Name" maxlength="100">
+      </div>
+      <div class="field">
+        <label>DESCRIPTION</label>
+        <textarea id="descInput" placeholder="What is this place? Hours, contact info, story..." maxlength="500"></textarea>
+      </div>
+      <div class="field">
+        <label>WEBSITE URL (OPTIONAL)</label>
+        <input type="text" id="urlInput" placeholder="https://...">
+      </div>
+      <div class="field" id="domainField" style="display:none">
+        <label>DNS BRIDGE — YOUR DOMAIN (OPTIONAL)</label>
+        <input type="text" id="domainInput" placeholder="example.com">
+        <div class="hint">Add a _gep TXT record to your DNS to verify ownership</div>
+      </div>
+    </div>
+
+    <!-- STEP 4: IDENTITY -->
+    <div class="step">
+      <div class="step-header"><div class="step-num">4</div><div class="step-title">Identity</div></div>
+      <div class="field">
+        <label>YOUR GNS PUBLIC KEY OR HANDLE</label>
+        <input type="text" id="pkInput" placeholder="@handle or ed25519 public key">
+        <div class="hint">From your GCRUMBS app — Settings → Identity → Public Key</div>
+      </div>
+    </div>
+
+    <!-- ERROR -->
+    <div class="error-box" id="errorBox" style="display:none"></div>
+
+    <!-- SUBMIT -->
+    <button class="submit-btn" id="submitBtn" onclick="submitClaim()" disabled>CREATE GEPSITE</button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="successView" style="display:none">
+    <div class="success">
+      <div class="emoji">🌍</div>
+      <h2>GEPSite Created!</h2>
+      <div class="title" id="successTitle"></div>
+      <div class="gea-box" style="margin:16px 0">
+        <div class="lbl">GEOEPOCH ADDRESS</div>
+        <div class="val" id="successGea"></div>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:20px 0">
+        <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:#00AEEF" id="successRes"></div><div style="font-size:10px;color:#636E72">Resolution</div></div>
+        <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:#FFD43B" id="successTier"></div><div style="font-size:10px;color:#636E72">Tier</div></div>
+      </div>
+      <button class="success-btn" id="viewWebBtn" onclick="viewOnWeb()">VIEW ON PHYSICAL WEB</button>
+      <button class="success-btn outline" onclick="copyGea()">COPY GEA ADDRESS</button>
+      <br><br>
+      <button class="success-btn outline" onclick="location.reload()">CREATE ANOTHER</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    GEP v1 · GNS Foundation / ULISSY s.r.l.<br>
+    <a href="https://gep.gcrumbs.com">Route Visualizer</a> ·
+    <a href="https://github.com/GNS-Foundation/gep-core">GitHub</a> ·
+    <a href="https://gcrumbs.com">GCRUMBS</a>
+  </div>
+</div>
+
+<script>
+function loadScript(url, cb) { var s=document.createElement('script');s.src=url;s.onload=cb;document.head.appendChild(s); }
+
+loadScript('https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js', initApp);
+
+function initApp() {
+
+var API = 'https://gns-browser-production.up.railway.app';
+var MBTOKEN = 'pk.eyJ1IjoiY2F5ZXJiZSIsImEiOiJjbW1hc2NoNnMwZmRxMnFyNGR0NG5lZHBqIn0.Nm2v5gzYR_qymV1FTdWgkQ';
+mapboxgl.accessToken = MBTOKEN;
+
+var state = { lat: null, lon: null, res: 10, tier: 'visitor', gea: null, marker: null };
+
+// Map
+var map = new mapboxgl.Map({ container:'minimap', style:'mapbox://styles/mapbox/dark-v11', center:[12.47,41.89], zoom:12, projection:'globe' });
+map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'top-right');
+map.on('style.load', function(){map.setFog({color:'#080c14','high-color':'#0d1520','horizon-blend':0.04,'space-color':'#080c14','star-intensity':0.25});});
+
+map.on('click', function(e) {
+  setLocation(e.lngLat.lat, e.lngLat.lng, e.lngLat.lat.toFixed(4)+', '+e.lngLat.lng.toFixed(4));
+});
+
+// Search
+var searchTO = null;
+var locInput = document.getElementById('locSearch');
+var locResults = document.getElementById('locResults');
+locInput.addEventListener('input', function() {
+  clearTimeout(searchTO);
+  var q = locInput.value.trim();
+  if (q.length < 3) { locResults.classList.remove('show'); return; }
+  searchTO = setTimeout(function() {
+    fetch('https://api.mapbox.com/geocoding/v5/mapbox.places/'+encodeURIComponent(q)+'.json?access_token='+MBTOKEN+'&limit=5')
+    .then(function(r){return r.json()}).then(function(d) {
+      locResults.innerHTML = '';
+      if (d.features && d.features.length) {
+        d.features.forEach(function(f) {
+          var div = document.createElement('div');
+          div.textContent = f.place_name;
+          div.onclick = function() {
+            locInput.value = f.place_name;
+            locResults.classList.remove('show');
+            setLocation(f.center[1], f.center[0], f.place_name);
+          };
+          locResults.appendChild(div);
+        });
+        locResults.classList.add('show');
+      } else locResults.classList.remove('show');
+    }).catch(function(){locResults.classList.remove('show');});
+  }, 300);
+});
+locInput.addEventListener('blur', function(){setTimeout(function(){locResults.classList.remove('show')},200)});
+
+function setLocation(lat, lon, name) {
+  state.lat = lat; state.lon = lon;
+  if (state.marker) state.marker.remove();
+  var el = document.createElement('div');
+  el.style.cssText = 'width:16px;height:16px;border-radius:50%;background:#00AEEF;box-shadow:0 0 12px #00AEEF;border:2px solid #fff';
+  state.marker = new mapboxgl.Marker({element:el}).setLngLat([lon,lat]).addTo(map);
+  map.flyTo({center:[lon,lat],zoom:state.res+5,duration:800});
+  computeGea();
+  checkReady();
+}
+
+function computeGea() {
+  if (!state.lat) return;
+  // Use backend lookup to get the real GEA
+  fetch(API+'/gep/address?lat='+state.lat+'&lon='+state.lon+'&resolution='+state.res)
+  .then(function(r){return r.json()}).then(function(d) {
+    if (d.success) {
+      state.gea = d.data.gea;
+      document.getElementById('geaBox').style.display = 'block';
+      document.getElementById('geaDisplay').textContent = d.data.gea;
+    }
+  }).catch(function(){});
+}
+
+window.setRes = function(r) {
+  state.res = r;
+  document.querySelectorAll('.res-btn').forEach(function(b){b.classList.remove('active')});
+  document.querySelector('.res-btn[data-res="'+r+'"]').classList.add('active');
+  computeGea();
+};
+
+window.setTier = function(t) {
+  state.tier = t;
+  document.querySelectorAll('.tier-card').forEach(function(c){c.classList.remove('active')});
+  document.querySelector('.tier-card[data-tier="'+t+'"]').classList.add('active');
+  document.querySelectorAll('.tier-check').forEach(function(c){c.style.display='none'});
+  document.getElementById('check-'+t).style.display = 'block';
+  document.getElementById('domainField').style.display = (t==='sovereign'||t==='resident') ? 'block' : 'none';
+  document.getElementById('submitBtn').textContent = t==='visitor' ? 'POST REVIEW' : 'CREATE GEPSITE';
+  checkReady();
+};
+
+function checkReady() {
+  var ready = state.lat && document.getElementById('titleInput').value.trim() && document.getElementById('pkInput').value.trim();
+  document.getElementById('submitBtn').disabled = !ready;
+}
+document.getElementById('titleInput').addEventListener('input', checkReady);
+document.getElementById('pkInput').addEventListener('input', checkReady);
+
+window.submitClaim = function() {
+  var title = document.getElementById('titleInput').value.trim();
+  var desc = document.getElementById('descInput').value.trim();
+  var url = document.getElementById('urlInput').value.trim();
+  var domain = document.getElementById('domainInput').value.trim();
+  var pk = document.getElementById('pkInput').value.trim();
+
+  if (!title || !pk || !state.lat) return;
+
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('submitBtn').textContent = 'SUBMITTING...';
+  document.getElementById('errorBox').style.display = 'none';
+
+  fetch(API+'/gep/claims', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      lat: state.lat,
+      lon: state.lon,
+      resolution: state.res,
+      claim_tier: state.tier,
+      claimant_pk: pk,
+      breadcrumbs_in_cell: state.tier === 'visitor' ? 1 : 50,
+      unique_days: state.tier === 'visitor' ? 1 : 30,
+      title: title,
+      description: desc || undefined,
+      content_url: url || undefined,
+      domain: domain || undefined,
+      delegation_cert: state.tier === 'sovereign' ? 'browser:'+pk.substring(0,16)+':'+Date.now() : undefined,
+      signature: 'browser_sig_'+Date.now()
+    })
+  })
+  .then(function(r){return r.json()})
+  .then(function(d) {
+    if (d.success) {
+      document.getElementById('formView').style.display = 'none';
+      document.getElementById('successView').style.display = 'block';
+      document.getElementById('successTitle').textContent = d.data.title;
+      document.getElementById('successGea').textContent = d.data.gea;
+      document.getElementById('successRes').textContent = 'R'+d.data.resolution;
+      document.getElementById('successTier').textContent = d.data.claim_tier.toUpperCase();
+      state.resultGea = d.data.gea;
+      state.resultLat = state.lat;
+      state.resultLon = state.lon;
+      state.resultRes = d.data.resolution;
+    } else {
+      document.getElementById('errorBox').textContent = d.error || 'Submission failed';
+      document.getElementById('errorBox').style.display = 'block';
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('submitBtn').textContent = state.tier==='visitor' ? 'POST REVIEW' : 'CREATE GEPSITE';
+    }
+  })
+  .catch(function(e) {
+    document.getElementById('errorBox').textContent = 'Network error: '+e.message;
+    document.getElementById('errorBox').style.display = 'block';
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('submitBtn').textContent = state.tier==='visitor' ? 'POST REVIEW' : 'CREATE GEPSITE';
+  });
+};
+
+window.viewOnWeb = function() {
+  window.open(API+'/gep/web/lookup?lat='+state.resultLat+'&lon='+state.resultLon+'&resolution='+state.resultRes, '_blank');
+};
+
+window.copyGea = function() {
+  navigator.clipboard.writeText(state.resultGea || '');
+  var btn = document.querySelector('.success-btn.outline');
+  btn.textContent = 'COPIED!';
+  setTimeout(function(){btn.textContent='COPY GEA ADDRESS'},1500);
+};
+
+} // end initApp
+</script>
+</body>
+</html>
