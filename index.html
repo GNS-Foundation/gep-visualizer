@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,83 +12,85 @@
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
+:root{--bg:#080c14;--bg2:rgba(0,174,239,.03);--text:#e0e6ed;--text2:#b0b8c1;--text3:#636E72;--text4:#4a5568;--text5:#2d3748;--border:rgba(0,174,239,.08);--border2:rgba(0,174,239,.15);--accent:#00AEEF;--green:#51CF66;--yellow:#FFD43B;--red:#FF6B6B;--card:rgba(0,174,239,.03);--input-bg:rgba(255,255,255,.06);--shadow:none;--map-style:dark-v11;--halo:#080c14;--hover-bg:rgba(0,174,239,.1);--search-bg:#111820}
+[data-theme="light"]{--bg:#f5f7fa;--bg2:rgba(0,174,239,.04);--text:#1a202c;--text2:#4a5568;--text3:#718096;--text4:#a0aec0;--text5:#cbd5e0;--border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.12);--card:#fff;--input-bg:#fff;--shadow:0 1px 4px rgba(0,0,0,.08);--map-style:light-v11;--halo:#f5f7fa;--hover-bg:rgba(0,174,239,.08);--search-bg:#fff}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:#080c14;color:#e0e6ed;font-family:'JetBrains Mono','SF Mono',monospace;overflow-x:hidden}
-button{font-family:inherit;cursor:pointer;transition:all .15s}
-button:hover{filter:brightness(1.2)}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono','SF Mono',monospace;overflow-x:hidden;transition:background .3s,color .3s}
+button{font-family:inherit;cursor:pointer;transition:all .15s}button:hover{filter:brightness(1.2)}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,174,239,.2);border-radius:2px}
-#map{width:100%;border-radius:8px;border:1px solid rgba(0,174,239,.1)}
+.theme-toggle{position:fixed;top:16px;right:16px;z-index:999;background:var(--card);border:1px solid var(--border2);border-radius:24px;padding:8px 14px;cursor:pointer;font-size:18px;box-shadow:var(--shadow);transition:all .3s}
+.theme-toggle:hover{transform:scale(1.1)}
+#map{width:100%;border-radius:10px;border:1px solid var(--border2);transition:border .3s}
 .mapboxgl-ctrl-attrib{opacity:.3!important;font-size:9px!important}
-.search-box{position:relative;flex:1;min-width:200px;max-width:340px}
-.search-box input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(0,174,239,.15);color:#e0e6ed;padding:8px 12px 8px 32px;border-radius:6px;font-size:12px;font-family:inherit;outline:none;transition:border-color .2s}
-.search-box input:focus{border-color:#00AEEF}
-.search-box .icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;opacity:.5}
-.search-box .results{position:absolute;top:100%;left:0;right:0;background:#111820;border:1px solid rgba(0,174,239,.15);border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;z-index:100;display:none}
+.search-box{position:relative;flex:1;min-width:220px;max-width:360px}
+.search-box input{width:100%;background:var(--input-bg);border:1px solid var(--border2);color:var(--text);padding:10px 14px 10px 36px;border-radius:8px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s,background .3s}
+.search-box input:focus{border-color:var(--accent)}
+.search-box .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.5}
+.search-box .results{position:absolute;top:100%;left:0;right:0;background:var(--search-bg);border:1px solid var(--border2);border-radius:0 0 8px 8px;max-height:220px;overflow-y:auto;z-index:100;display:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
 .search-box .results.show{display:block}
-.search-box .results div{padding:8px 12px;font-size:11px;color:#b0b8c1;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.03)}
-.search-box .results div:hover{background:rgba(0,174,239,.1);color:#fff}
-.preset-btn{background:rgba(0,174,239,.06);border:1px solid rgba(0,174,239,.15);color:#00AEEF;padding:5px 11px;border-radius:4px;font-size:10px}
-.res-btn{background:transparent;border:1px solid rgba(0,174,239,.1);color:#00AEEF;padding:4px 10px;border-radius:3px;font-size:11px}
-.res-btn.active{background:rgba(0,174,239,.2);border-color:#00AEEF;color:#fff}
-.hop-row{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:3px;transition:opacity .3s}
+.search-box .results div{padding:10px 14px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:1px solid var(--border)}
+.search-box .results div:hover{background:var(--hover-bg);color:var(--text)}
+.preset-btn{background:var(--bg2);border:1px solid var(--border2);color:var(--accent);padding:6px 14px;border-radius:6px;font-size:12px;transition:all .2s}
+.preset-btn:hover{background:rgba(0,174,239,.12)}
+.res-btn{background:transparent;border:1px solid var(--border);color:var(--accent);padding:5px 12px;border-radius:5px;font-size:13px;transition:all .2s}
+.res-btn.active{background:rgba(0,174,239,.2);border-color:var(--accent);color:#fff}
+.hop-row{display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:4px;transition:opacity .3s}
 .hop-row:nth-child(odd){background:rgba(255,255,255,.012)}
-.hop-row.peak{background:rgba(255,212,59,.06);border-left:2px solid #FFD43B}
-.hop-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.hop-badge{font-size:8px;padding:2px 7px;border-radius:3px;width:72px;text-align:center;display:inline-block}
+[data-theme="light"] .hop-row:nth-child(odd){background:rgba(0,0,0,.02)}
+.hop-row.peak{background:rgba(255,212,59,.06);border-left:2px solid var(--yellow)}
+.hop-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hop-badge{font-size:10px;padding:3px 8px;border-radius:4px;width:80px;text-align:center;display:inline-block}
+.route-panel{max-width:800px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow);transition:background .3s,border .3s}
+.footer{text-align:center;margin-top:22px;font-size:11px;color:var(--text5);line-height:2}
 </style>
 </head>
 <body>
-<div style="max-width:1200px;margin:0 auto;padding:14px 12px">
-  <div style="text-align:center;margin-bottom:12px">
-    <div style="font-size:10px;letter-spacing:7px;color:#00AEEF;opacity:.6;margin-bottom:3px">GEOEPOCH PROTOCOL</div>
-    <h1 style="font-size:28px;font-weight:800;margin:0;background:linear-gradient(135deg,#00AEEF,#51CF66);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Route Visualizer</h1>
-    <p style="font-size:11px;color:#4a5568;margin-top:4px">Search any place on Earth or click the map. Watch GEP route using pure geometry.</p>
+<div class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">🌙</div>
+<div style="max-width:1200px;margin:0 auto;padding:16px 14px">
+  <div style="text-align:center;margin-bottom:14px">
+    <div style="font-size:12px;letter-spacing:7px;color:var(--accent);opacity:.7;margin-bottom:4px">GEOEPOCH PROTOCOL</div>
+    <h1 style="font-size:32px;font-weight:800;margin:0;background:linear-gradient(135deg,#00AEEF,#51CF66);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Route Visualizer</h1>
+    <p style="font-size:14px;color:var(--text4);margin-top:6px">Search any place on Earth or click the map. Watch GEP route using pure geometry.</p>
   </div>
-  <div id="presets" style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:10px"></div>
-  <div style="display:flex;gap:10px;justify-content:center;align-items:flex-start;flex-wrap:wrap;margin-bottom:8px">
+  <div id="presets" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px"></div>
+  <div style="display:flex;gap:12px;justify-content:center;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px">
     <div class="search-box"><span class="icon">📍</span><input type="text" id="fromInput" placeholder="Sender — search address or click map"><div class="results" id="fromResults"></div></div>
-    <span style="color:#636E72;font-size:18px;padding-top:6px">→</span>
+    <span style="color:var(--text3);font-size:20px;padding-top:8px">→</span>
     <div class="search-box"><span class="icon">🎯</span><input type="text" id="toInput" placeholder="Receiver — search address or click map"><div class="results" id="toResults"></div></div>
   </div>
-  <div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:10px">
-    <button id="resetBtn" style="background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#FF6B6B;padding:5px 14px;border-radius:4px;font-size:11px">RESET</button>
-    <span style="font-size:10px;color:#636E72">Resolution:</span>
-    <div id="resButtons" style="display:inline-flex;gap:4px"></div>
-    <span id="distLabel" style="font-size:10px;color:#51CF66"></span>
+  <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+    <button id="resetBtn" style="background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:var(--red);padding:6px 16px;border-radius:6px;font-size:13px">RESET</button>
+    <span style="font-size:12px;color:var(--text3)">Resolution:</span>
+    <div id="resButtons" style="display:inline-flex;gap:5px"></div>
+    <span id="distLabel" style="font-size:12px;color:var(--green);font-weight:600"></span>
   </div>
-  <div id="instruction" style="text-align:center;font-size:12px;margin-bottom:6px;color:#00AEEF">Loading map...</div>
-  <div id="map" style="height:480px;margin-bottom:10px"></div>
-  <div style="display:flex;gap:16px;justify-content:center;margin-bottom:12px;flex-wrap:wrap" id="legend"></div>
-  <div id="routePanel" style="display:none;max-width:800px;margin:0 auto;background:rgba(0,174,239,.03);border:1px solid rgba(0,174,239,.08);border-radius:8px;padding:14px">
-    <div id="stats" style="display:flex;justify-content:center;gap:20px;margin-bottom:10px;flex-wrap:wrap"></div>
-    <div style="font-size:9px;color:#636E72;letter-spacing:1px;margin-bottom:6px">ROUTING TRACE</div>
-    <div id="hops" style="max-height:340px;overflow-y:auto"></div>
+  <div id="instruction" style="text-align:center;font-size:14px;margin-bottom:8px;color:var(--accent)">Loading map...</div>
+  <div id="map" style="height:500px;margin-bottom:12px"></div>
+  <div style="display:flex;gap:18px;justify-content:center;margin-bottom:14px;flex-wrap:wrap" id="legend"></div>
+  <div id="routePanel" class="route-panel" style="display:none">
+    <div id="stats" style="display:flex;justify-content:center;gap:24px;margin-bottom:12px;flex-wrap:wrap"></div>
+    <div style="font-size:11px;color:var(--text3);letter-spacing:1.5px;margin-bottom:8px">ROUTING TRACE</div>
+    <div id="hops" style="max-height:360px;overflow-y:auto"></div>
   </div>
-  <div style="text-align:center;margin-top:18px;font-size:9px;color:#2d3748;line-height:1.8">
+  <div class="footer">
     GEP v1 · GNS Foundation / ULISSY s.r.l.<br>
     Place = H3 Cell · Address = Epoch Chain · Routing = Geometry<br>
-    <a href="https://github.com/GNS-Foundation/gep-core" target="_blank" style="color:#00AEEF;text-decoration:none">github.com/GNS-Foundation/gep-core</a>
-    · <a href="https://gcrumbs.com" target="_blank" style="color:#00AEEF;text-decoration:none">gcrumbs.com</a> · <a href="/create.html" style="color:#51CF66;text-decoration:none;font-weight:700">+ Create GEPSite</a>
+    <a href="https://github.com/GNS-Foundation/gep-core" target="_blank">github.com/GNS-Foundation/gep-core</a>
+    · <a href="https://gcrumbs.com" target="_blank">gcrumbs.com</a>
+    · <a href="/create" style="color:#51CF66;font-weight:700">+ Create GEPSite</a>
   </div>
 </div>
 
-<!-- Load Mapbox GL JS, then call init() when done -->
 <script>
-function loadMapbox() {
-  var s = document.createElement('script');
-  s.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
-  s.onload = function() { initApp(); };
-  document.head.appendChild(s);
-}
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadMapbox);
-} else {
-  loadMapbox();
-}
+function toggleTheme(){var h=document.documentElement,c=h.getAttribute('data-theme'),n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);document.getElementById('themeBtn').textContent=n==='dark'?'🌙':'☀️';localStorage.setItem('gep-theme',n);if(window._map){window._map.setStyle('mapbox://styles/mapbox/'+(n==='dark'?'dark-v11':'light-v11'));}}
+var saved=localStorage.getItem('gep-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);document.getElementById('themeBtn').textContent=saved==='dark'?'🌙':'☀️';}
 
-function initApp() {
+function loadMapbox(){var s=document.createElement('script');s.src='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';s.onload=function(){initApp();};document.head.appendChild(s);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',loadMapbox);}else{loadMapbox();}
 
-// ── GEP ENGINE ──
+function initApp(){
+
 var H3K=[1107.71,418.68,158.24,59.81,22.61,8.54,3.23,1.22,.46,.17,.065,.025,.009,.003,.001,.0005];
 function hav(a,b,c,d){var R=6371,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180,x=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
 function findAR(a,b,c,d){var dist=hav(a,b,c,d);for(var r=15;r>=0;r--)if(H3K[r]*2.5>=dist)return r;return 0}
@@ -112,7 +114,6 @@ function geoLabel(lat,lon,res,dir){
   return Math.abs(lat).toFixed(0)+(lat>0?'N':'S')+', '+Math.abs(lon).toFixed(0)+(lon>0?'E':'W');
 }
 
-// ── STATE ──
 var DC={origin:'#00AEEF',ascend:'#FF6B6B',descend:'#51CF66',destination:'#FFD43B'};
 var DL={origin:'ORIGIN',ascend:'ASCEND ▲',descend:'DESCEND ▼',destination:'DEST'};
 var PRESETS=[
@@ -126,13 +127,20 @@ var PRESETS=[
 var fromPt=null,toPt=null,currentRes=7,route=null,animFrame=null;
 var fromMarker=null,toMarker=null;
 
-// ── MAPBOX ──
 mapboxgl.accessToken='pk.eyJ1IjoiY2F5ZXJiZSIsImEiOiJjbW1hc2NoNnMwZmRxMnFyNGR0NG5lZHBqIn0.Nm2v5gzYR_qymV1FTdWgkQ';
-var map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/dark-v11',center:[20,25],zoom:1.8,projection:'globe',attributionControl:true});
+var theme=document.documentElement.getAttribute('data-theme')||'dark';
+var map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/'+(theme==='dark'?'dark-v11':'light-v11'),center:[20,25],zoom:1.8,projection:'globe',attributionControl:true});
+window._map=map;
 map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'top-right');
 map.on('style.load',function(){
-  map.setFog({color:'#080c14','high-color':'#0d1520','horizon-blend':0.04,'space-color':'#080c14','star-intensity':0.25});
+  var t=document.documentElement.getAttribute('data-theme')||'dark';
+  if(t==='dark')map.setFog({color:'#080c14','high-color':'#0d1520','horizon-blend':0.04,'space-color':'#080c14','star-intensity':0.25});
   document.getElementById('instruction').textContent='\u2B07 Search or click the map to place SENDER';
+  // Re-add markers after style change
+  if(fromPt&&fromMarker){fromMarker.remove();fromMarker=new mapboxgl.Marker({element:mkEl('#00AEEF')}).setLngLat([fromPt[1],fromPt[0]]).addTo(map);}
+  if(toPt&&toMarker){toMarker.remove();toMarker=new mapboxgl.Marker({element:mkEl('#FFD43B')}).setLngLat([toPt[1],toPt[0]]).addTo(map);}
+  // Re-draw route if exists
+  if(route)setTimeout(function(){drawRoute(route,1);},200);
 });
 map.on('click',function(e){
   var lat=e.lngLat.lat,lon=e.lngLat.lng;
@@ -140,7 +148,6 @@ map.on('click',function(e){
   else if(!toPt){setTo(lat,lon,'');runRoute();}
 });
 
-// ── GEOCODING ──
 var searchTO=null;
 function setupSearch(iid,rid,cb){
   var inp=document.getElementById(iid),res=document.getElementById(rid);
@@ -167,7 +174,6 @@ function setupSearch(iid,rid,cb){
 setupSearch('fromInput','fromResults',function(lat,lon,name){setFrom(lat,lon,name);if(toPt)runRoute();});
 setupSearch('toInput','toResults',function(lat,lon,name){setTo(lat,lon,name);if(fromPt)runRoute();});
 
-// ── MARKERS ──
 function mkEl(color){var el=document.createElement('div');el.style.cssText='width:16px;height:16px;border-radius:50%;background:'+color+';box-shadow:0 0 12px '+color+',0 0 24px '+color+'40;border:2px solid #fff';return el;}
 function setFrom(lat,lon,name){
   fromPt=[lat,lon];if(fromMarker)fromMarker.remove();
@@ -181,12 +187,11 @@ function setTo(lat,lon,name){
 }
 function updInst(){
   var el=document.getElementById('instruction');
-  if(!fromPt){el.textContent='\u2B07 Search or click the map to place SENDER';el.style.color='#00AEEF';}
-  else if(!toPt){el.textContent='\u2B07 Search or click the map to place RECEIVER';el.style.color='#FFD43B';}
+  if(!fromPt){el.textContent='\u2B07 Search or click the map to place SENDER';el.style.color='var(--accent)';}
+  else if(!toPt){el.textContent='\u2B07 Search or click the map to place RECEIVER';el.style.color='var(--yellow)';}
   else el.textContent='';
 }
 
-// ── ROUTE DRAWING ──
 function clearRoute(){
   ['gep-glow','gep-line','gep-dots-layer','gep-labels'].forEach(function(id){if(map.getLayer(id))map.removeLayer(id);});
   ['gep-route','gep-dots'].forEach(function(id){if(map.getSource(id))map.removeSource(id);});
@@ -206,7 +211,8 @@ function drawRoute(hops,progress){
   });
   map.addSource('gep-dots',{type:'geojson',data:{type:'FeatureCollection',features:dots}});
   map.addLayer({id:'gep-dots-layer',type:'circle',source:'gep-dots',paint:{'circle-radius':['get','size'],'circle-color':['get','color'],'circle-opacity':.9,'circle-stroke-width':1.5,'circle-stroke-color':'#fff','circle-stroke-opacity':.5}});
-  map.addLayer({id:'gep-labels',type:'symbol',source:'gep-dots',layout:{'text-field':['get','label'],'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],'text-size':11,'text-offset':[1.2,0],'text-anchor':'left'},paint:{'text-color':['get','color'],'text-halo-color':'#080c14','text-halo-width':1.5}});
+  var haloColor=document.documentElement.getAttribute('data-theme')==='dark'?'#080c14':'#f5f7fa';
+  map.addLayer({id:'gep-labels',type:'symbol',source:'gep-dots',layout:{'text-field':['get','label'],'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],'text-size':12,'text-offset':[1.2,0],'text-anchor':'left'},paint:{'text-color':['get','color'],'text-halo-color':haloColor,'text-halo-width':1.5}});
 }
 function animRoute(hops){
   if(animFrame)cancelAnimationFrame(animFrame);
@@ -215,7 +221,6 @@ function animRoute(hops){
   animFrame=requestAnimationFrame(tick);
 }
 
-// ── RUN ──
 function runRoute(){
   if(!fromPt||!toPt)return;
   route=computeRoute(fromPt[0],fromPt[1],toPt[0],toPt[1],currentRes);
@@ -242,22 +247,20 @@ function doReset(){
 }
 document.getElementById('resetBtn').onclick=doReset;
 
-// ── RENDERERS ──
 function renderStats(hops,dist){
   var peakR=Math.min.apply(null,hops.map(function(h){return h.resolution}));
   var items=[['HOPS',hops.length,'#00AEEF'],['PEAK','R'+peakR,'#FFD43B'],['ASCEND',hops.filter(function(h){return h.direction==='ascend'}).length,'#FF6B6B'],['DESCEND',hops.filter(function(h){return h.direction==='descend'}).length,'#51CF66'],['DISTANCE',dist.toFixed(0)+' km','#00AEEF']];
-  document.getElementById('stats').innerHTML=items.map(function(i){return'<div style="text-align:center"><div style="font-size:9px;color:#636E72;letter-spacing:1px">'+i[0]+'</div><div style="font-size:15px;font-weight:700;color:'+i[2]+'">'+i[1]+'</div></div>'}).join('');
+  document.getElementById('stats').innerHTML=items.map(function(i){return'<div style="text-align:center"><div style="font-size:11px;color:var(--text3);letter-spacing:1.5px">'+i[0]+'</div><div style="font-size:18px;font-weight:700;color:'+i[2]+'">'+i[1]+'</div></div>'}).join('');
 }
 function renderHops(hops,progress){
   var peakR=Math.min.apply(null,hops.map(function(h){return h.resolution}));
   document.getElementById('hops').innerHTML=hops.map(function(h,i){
     var op=progress>=(i+1)/hops.length?1:.1;
     var pk=h.resolution===peakR&&h.direction==='ascend';var c=DC[h.direction];
-    return'<div class="hop-row'+(pk?' peak':'')+'" style="opacity:'+op+'"><div class="hop-dot" style="background:'+c+';box-shadow:0 0 4px '+c+'"></div><span style="width:30px;font-size:12px;color:'+c+';font-weight:700">R'+h.resolution+'</span><span class="hop-badge" style="background:'+c+'18;color:'+c+'">'+DL[h.direction]+'</span><span style="font-size:11px;color:#b0b8c1;flex:1;font-weight:'+(pk?600:400)+'">'+geoLabel(h.lat,h.lon,h.resolution,h.direction)+(pk?' \u2605':'')+'</span><span style="font-size:10px;color:#4a5568">'+h.lat.toFixed(2)+'\u00B0, '+h.lon.toFixed(2)+'\u00B0</span><span style="font-size:9px;color:#2d3748;margin-left:4px">'+h.cellHash+'</span></div>';
+    return'<div class="hop-row'+(pk?' peak':'')+'" style="opacity:'+op+'"><div class="hop-dot" style="background:'+c+';box-shadow:0 0 4px '+c+'"></div><span style="width:34px;font-size:14px;color:'+c+';font-weight:700">R'+h.resolution+'</span><span class="hop-badge" style="background:'+c+'18;color:'+c+'">'+DL[h.direction]+'</span><span style="font-size:13px;color:var(--text2);flex:1;font-weight:'+(pk?600:400)+'">'+geoLabel(h.lat,h.lon,h.resolution,h.direction)+(pk?' \u2605':'')+'</span><span style="font-size:12px;color:var(--text4)">'+h.lat.toFixed(2)+'\u00B0, '+h.lon.toFixed(2)+'\u00B0</span><span style="font-size:11px;color:var(--text5);margin-left:6px">'+h.cellHash+'</span></div>';
   }).join('');
 }
 
-// ── PRESETS ──
 var pc=document.getElementById('presets');
 PRESETS.forEach(function(p){
   var b=document.createElement('button');b.className='preset-btn';b.textContent=p.label;
@@ -265,7 +268,6 @@ PRESETS.forEach(function(p){
   pc.appendChild(b);
 });
 
-// ── RES BUTTONS ──
 var rc=document.getElementById('resButtons');
 [5,7,9].forEach(function(r){
   var b=document.createElement('button');b.className='res-btn'+(r===currentRes?' active':'');b.textContent='R'+r;
@@ -273,13 +275,12 @@ var rc=document.getElementById('resButtons');
   rc.appendChild(b);
 });
 
-// ── LEGEND ──
 var lc=document.getElementById('legend');
 Object.keys(DC).forEach(function(d){
-  lc.innerHTML+='<div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:50%;background:'+DC[d]+';box-shadow:0 0 6px '+DC[d]+'"></div><span style="font-size:10px;color:#636E72;letter-spacing:1px">'+DL[d]+'</span></div>';
+  lc.innerHTML+='<div style="display:flex;align-items:center;gap:6px"><div style="width:9px;height:9px;border-radius:50%;background:'+DC[d]+';box-shadow:0 0 6px '+DC[d]+'"></div><span style="font-size:12px;color:var(--text3);letter-spacing:1px">'+DL[d]+'</span></div>';
 });
 
-} // end initApp
+}
 </script>
 </body>
 </html>
