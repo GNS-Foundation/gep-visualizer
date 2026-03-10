@@ -8,12 +8,6 @@
 <meta property="og:title" content="GEP Route Visualizer — GeoEpoch Protocol">
 <meta property="og:description" content="The addressing layer the internet never had. Click two points on Earth. Watch the route.">
 <meta property="og:url" content="https://gep.gcrumbs.com">
-<meta property="og:image" content="https://gep.gcrumbs.com/gep-og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://gep.gcrumbs.com/gep-og-image.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -49,6 +43,30 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .hop-badge{font-size:10px;padding:3px 8px;border-radius:4px;width:80px;text-align:center;display:inline-block}
 .route-panel{max-width:800px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow);transition:background .3s,border .3s}
 .footer{text-align:center;margin-top:22px;font-size:11px;color:var(--text5);line-height:2}
+/* Marketing hero */
+.hero-tagline{font-size:15px;color:var(--text2);margin-top:8px;line-height:1.7;max-width:640px;margin-left:auto;margin-right:auto}
+.hero-tagline em{color:var(--accent);font-style:normal;font-weight:700}
+.hero-compare{display:inline-flex;gap:16px;margin:10px 0 6px;flex-wrap:wrap;justify-content:center}
+.hero-compare .chip{background:var(--bg2);border:1px solid var(--border2);padding:5px 14px;border-radius:20px;font-size:12px;color:var(--text2)}
+.hero-compare .chip b{color:var(--accent)}
+/* Math section */
+.math-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border2);color:var(--accent);padding:8px 18px;border-radius:8px;font-size:13px;cursor:pointer;margin:8px auto;transition:all .2s}
+.math-toggle:hover{background:rgba(0,174,239,.1);border-color:var(--accent)}
+.math-toggle .arrow{transition:transform .3s;display:inline-block}
+.math-toggle .arrow.open{transform:rotate(180deg)}
+.math-panel{max-width:800px;margin:0 auto 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;box-shadow:var(--shadow);display:none;transition:all .3s}
+.math-panel.show{display:block}
+.math-panel h3{font-size:16px;color:var(--accent);margin-bottom:12px}
+.math-panel h4{font-size:13px;color:var(--yellow);margin:16px 0 8px;letter-spacing:1px}
+.math-panel p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:8px}
+.math-panel .formula{background:rgba(0,0,0,.2);border:1px solid var(--border2);border-radius:8px;padding:14px 18px;margin:10px 0;font-size:15px;color:var(--green);text-align:center;font-weight:700;letter-spacing:.5px}
+[data-theme="light"] .math-panel .formula{background:rgba(0,174,239,.04)}
+.math-panel .table{width:100%;border-collapse:collapse;margin:10px 0}
+.math-panel .table th{font-size:11px;color:var(--text3);letter-spacing:1px;text-align:left;padding:6px 10px;border-bottom:1px solid var(--border2)}
+.math-panel .table td{font-size:12px;color:var(--text2);padding:5px 10px;border-bottom:1px solid var(--border)}
+.math-panel .table td:first-child{color:var(--accent);font-weight:700}
+.math-panel .insight{background:rgba(0,174,239,.04);border-left:3px solid var(--accent);padding:12px 16px;margin:12px 0;font-size:13px;color:var(--text2);line-height:1.6;border-radius:0 8px 8px 0}
+.math-panel .insight em{color:var(--accent);font-style:normal}
 </style>
 </head>
 <body>
@@ -57,7 +75,52 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
   <div style="text-align:center;margin-bottom:14px">
     <div style="font-size:12px;letter-spacing:7px;color:var(--accent);opacity:.7;margin-bottom:4px">GEOEPOCH PROTOCOL</div>
     <h1 style="font-size:32px;font-weight:800;margin:0;background:linear-gradient(135deg,#00AEEF,#51CF66);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Route Visualizer</h1>
-    <p style="font-size:14px;color:var(--text4);margin-top:6px">Search any place on Earth or click the map. Watch GEP route using pure geometry.</p>
+    <p class="hero-tagline"><em>IP addresses</em> are logical entities — assigned by authorities, governed by institutions, limited by design. They tell computers how to find each other, but they know nothing about <em>where</em> things actually are.<br><br>The Earth already has 569 trillion unique points. Why invent addresses when geography gives them to us for free?<br><br>Welcome to <em>GEP</em>.</p>
+    <div class="hero-compare">
+      <span class="chip"><b>IP</b> = assigned by IANA · expires · abstract</span>
+      <span class="chip" style="border-color:var(--accent)"><b>GEP</b> = derived from geometry · permanent · physical</span>
+    </div>
+    <p style="font-size:13px;color:var(--text4);margin-top:4px">Click two places on Earth. Watch GEP route between them — no servers, no DNS, no lookup tables. Just math.</p>
+    <div style="text-align:center;margin:8px 0">
+      <div class="math-toggle" onclick="toggleMath()"><span>📐 The Math Behind GEP</span><span class="arrow" id="mathArrow">▼</span></div>
+    </div>
+  </div>
+
+  <!-- THE MATH -->
+  <div class="math-panel" id="mathPanel">
+    <h3>How GEP Addresses the Entire Earth</h3>
+    <p>GEP uses Uber's H3 hexagonal grid to divide the Earth into cells at 16 resolutions (R0–R15). Each resolution is exactly 7× more precise than the previous — a mathematical property of hexagonal tessellation.</p>
+    <h4>THE CORE FORMULA</h4>
+    <div class="formula">c(r) = 2 + 120 × 7<sup>r</sup></div>
+    <p>Where <b>c(r)</b> is the number of cells at resolution <b>r</b>. At R0 (continent scale), Earth has 122 cells. At R15 (sub-meter), it has <b>569 trillion</b>.</p>
+    <h4>RESOLUTION TABLE</h4>
+    <table class="table">
+      <tr><th>RES</th><th>CELLS</th><th>SCALE</th><th>CELL SIZE</th><th>ANALOGY</th></tr>
+      <tr><td>R0</td><td>122</td><td>Continent</td><td>1,107 km</td><td>Like a country code (+1, +39)</td></tr>
+      <tr><td>R5</td><td>2,016,842</td><td>City</td><td>8.5 km</td><td>Like an area code (212, 06)</td></tr>
+      <tr><td>R7</td><td>98,825,162</td><td>Neighborhood</td><td>1.22 km</td><td>Like a zip code</td></tr>
+      <tr><td>R10</td><td>33.9 billion</td><td>Street address</td><td>65 m</td><td>Like a street number</td></tr>
+      <tr><td>R15</td><td>569 trillion</td><td>Sub-meter</td><td>0.5 m</td><td>Like a desk in a room</td></tr>
+    </table>
+    <h4>ROUTING: PURE GEOMETRY</h4>
+    <p>GEP routes packets between any two points on Earth by finding their <b>Lowest Common Ancestor</b> in the H3 hierarchy — the coarsest resolution where both points share the same parent cell.</p>
+    <div class="formula">Route(A → B) = Ascend(A, R<sub>ancestor</sub>) + Descend(R<sub>ancestor</sub>, B)</div>
+    <p>The algorithm ascends from the sender's resolution to the common ancestor, then descends to the receiver. Zero external state. Zero routing tables. O(R) time complexity.</p>
+    <div class="insight">
+      <em>The key insight:</em> Unlike IP routing which requires BGP tables, DNS lookups, and peering agreements — GEP routing is <em>algorithmic</em>. Given any two coordinates on Earth, the route is <em>deterministic</em> and computable by any node with nothing but the H3 library and basic geometry.
+    </div>
+    <h4>EPOCH CHAIN: CRYPTOGRAPHIC ADDRESSING</h4>
+    <p>Each H3 cell's index is SHA-256 hashed to produce a permanent, collision-resistant address called a <b>GEA</b> (GeoEpoch Address):</p>
+    <div class="formula">GEA = "gea:" + Resolution + ":" + SHA256(H3CellIndex)</div>
+    <p>These hashes are chained across resolutions into an <b>Epoch Chain</b> — a Merkle-like structure where each resolution's hash commits to all cells at that level. The genesis hash anchors the entire system:</p>
+    <div class="formula" style="font-size:12px;color:var(--yellow)">Genesis: 26acb5d998b63d54f2ed92851c5c565db9fe0930fc06b06091d05c0ce4ff8289</div>
+    <div class="insight">
+      <em>Think of it this way:</em> IP addresses are assigned by IANA, a human institution. GEP addresses are <em>derived from geometry</em> — they existed before anyone computed them. The Colosseum's GEA has been deterministic since the H3 grid was defined. Nobody assigns it. Mathematics guarantees it.
+    </div>
+    <h4>PATENT PENDING</h4>
+    <p style="color:var(--text3);font-size:12px">Five innovations identified. Related to Provisional Patent #63/948,788.<br>
+    <a href="https://github.com/GNS-Foundation/gep-core" target="_blank">github.com/GNS-Foundation/gep-core</a> · 
+    <a href="/create" style="color:var(--green)">Create a GEPSite →</a></p>
   </div>
   <div id="presets" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px"></div>
   <div style="display:flex;gap:12px;justify-content:center;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px">
@@ -80,16 +143,17 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
     <div id="hops" style="max-height:360px;overflow-y:auto"></div>
   </div>
   <div class="footer">
-    GEP v1 · GNS Foundation / ULISSY s.r.l.<br>
-    Place = H3 Cell · Address = Epoch Chain · Routing = Geometry<br>
-    <a href="https://github.com/GNS-Foundation/gep-core" target="_blank">github.com/GNS-Foundation/gep-core</a>
-    · <a href="https://gcrumbs.com" target="_blank">gcrumbs.com</a>
+    GEP v1 · GNS Foundation / ULISSY s.r.l. · Patent Pending<br>
+    Every point on Earth has a permanent address. Every address has a route. No servers required.<br>
+    <a href="https://github.com/GNS-Foundation/gep-core" target="_blank">GitHub</a>
+    · <a href="https://gcrumbs.com" target="_blank">GCRUMBS App</a>
     · <a href="/create" style="color:#51CF66;font-weight:700">+ Create GEPSite</a>
   </div>
 </div>
 
 <script>
 function toggleTheme(){var h=document.documentElement,c=h.getAttribute('data-theme'),n=c==='dark'?'light':'dark';h.setAttribute('data-theme',n);document.getElementById('themeBtn').textContent=n==='dark'?'🌙':'☀️';localStorage.setItem('gep-theme',n);if(window._map){window._map.setStyle('mapbox://styles/mapbox/'+(n==='dark'?'dark-v11':'light-v11'));}}
+function toggleMath(){var p=document.getElementById('mathPanel'),a=document.getElementById('mathArrow');if(p.classList.contains('show')){p.classList.remove('show');a.classList.remove('open');}else{p.classList.add('show');a.classList.add('open');p.scrollIntoView({behavior:'smooth',block:'nearest'});}}
 var saved=localStorage.getItem('gep-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);document.getElementById('themeBtn').textContent=saved==='dark'?'🌙':'☀️';}
 
 function loadMapbox(){var s=document.createElement('script');s.src='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';s.onload=function(){initApp();};document.head.appendChild(s);}
