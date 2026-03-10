@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEP Route Visualizer — GeoEpoch Protocol</title>
+<meta name="description" content="Interactive demo of the GeoEpoch Protocol — the Earth as a routing fabric. Click any two points on the planet and watch GEP route between them using pure geometry.">
+<meta property="og:title" content="GEP Route Visualizer — GeoEpoch Protocol">
+<meta property="og:description" content="The addressing layer the internet never had — for the physical world. Click two points on Earth. Watch the route.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gep.gcrumbs.com">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #080c14; color: #e0e6ed; font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace; overflow-x: hidden; }
+  button { font-family: inherit; cursor: pointer; transition: all 0.2s; }
+  button:hover { filter: brightness(1.2); }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,174,239,0.2); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+const { useState, useEffect, useRef, useCallback, createElement: h } = React;
+
+// ─── H3 APPROXIMATION ENGINE ───
+const H3_EDGE_KM = [1107.71,418.68,158.24,59.81,22.61,8.54,3.23,1.22,0.46,0.17,0.065,0.025,0.009,0.003,0.001,0.0005];
+const CELL_COUNTS = ["122","842","5,882","41,162","288,122","2,016,842","14,117,882","98,825,162","691,776,122","4,842,432,842","33,897,029,882","237,279,209,162","1,660,954,464,122","11,626,681,248,842","81,386,768,741,882","569,707,381,193,162"];
+
+function haversineKm(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
+
+function findAncestorRes(a,b,c,d){const dist=haversineKm(a,b,c,d);for(let r=15;r>=0;r--)if(H3_EDGE_KM[r]*2.5>=dist)return r;return 0}
+
+function interp(a,b,c,d,t){const R=Math.PI/180,D=180/Math.PI,f1=a*R,l1=b*R,f2=c*R,l2=d*R,dd=2*Math.asin(Math.sqrt(Math.sin((f2-f1)/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin((l2-l1)/2)**2));if(dd<1e-10)return[a,b];const A=Math.sin((1-t)*dd)/Math.sin(dd),B=Math.sin(t*dd)/Math.sin(dd),x=A*Math.cos(f1)*Math.cos(l1)+B*Math.cos(f2)*Math.cos(l2),y=A*Math.cos(f1)*Math.sin(l1)+B*Math.cos(f2)*Math.sin(l2),z=A*Math.sin(f1)+B*Math.sin(f2);return[D*Math.atan2(z,Math.sqrt(x*x+y*y)),D*Math.atan2(y,x)]}
+
+function cellHash(a,b,r){let h=0x9e3779b9;const s=`${a.toFixed(6)}:${b.toFixed(6)}:${r}`;for(let i=0;i<s.length;i++)h=((h<<5)-h+s.charCodeAt(i))|0;return(h>>>0).toString(16).padStart(8,"0")}
+
+function computeRoute(fLat,fLon,tLat,tLon,maxR=7){
+  const aR=findAncestorRes(fLat,fLon,tLat,tLon),hops=[];
+  for(let r=maxR;r>=aR;r--){
+    const t=1-(r-aR)/(maxR-aR+1)*0.15;
+    const[la,lo]=r===maxR?[fLat,fLon]:interp(fLat,fLon,tLat,tLon,(1-t)*0.3);
+    hops.push({resolution:r,cellHash:cellHash(la,lo,r),direction:r===maxR?"origin":"ascend",centroid:{lat:la,lon:lo}});
+  }
+  for(let r=aR+1;r<=maxR;r++){
+    const t=(r-aR)/(maxR-aR);
+    const[la,lo]=r===maxR?[tLat,tLon]:interp(fLat,fLon,tLat,tLon,0.3+t*0.7);
+    hops.push({resolution:r,cellHash:cellHash(la,lo,r),direction:r===maxR?"destination":"descend",centroid:{lat:la,lon:lo}});
+  }
+  return hops;
+}
+
+// ─── CONSTANTS ───
+const DC={origin:"#00AEEF",ascend:"#FF6B6B",descend:"#51CF66",destination:"#FFD43B"};
+const DL={origin:"ORIGIN",ascend:"ASCEND ▲",descend:"DESCEND ▼",destination:"DEST"};
+const PRESETS=[
+  {label:"Rome → Tokyo",from:[41.89,12.49],to:[35.68,139.69]},
+  {label:"Rome → New York",from:[41.89,12.49],to:[40.71,-74.01]},
+  {label:"London → Sydney",from:[51.51,-0.13],to:[-33.87,151.21]},
+  {label:"Nairobi → Reykjavik",from:[-1.29,36.82],to:[64.15,-21.94]},
+  {label:"São Paulo → Mumbai",from:[-23.55,-46.63],to:[19.08,72.88]},
+  {label:"Cape Town → Seoul",from:[-33.93,18.42],to:[37.57,126.98]},
+  {label:"Mid-Pacific → Mid-Atlantic",from:[0,-160],to:[25,-35]},
+];
+
+function geoLabel(lat,lon,res,dir){
+  if(dir==="origin")return"Origin";if(dir==="destination")return"Destination";
+  if(res===0)return"Earth (Common Ancestor)";
+  if(lat>55&&lon>-30&&lon<40)return"N. Europe";if(lat>35&&lon>-10&&lon<30)return"Mediterranean";
+  if(lat>35&&lon>30&&lon<60)return"Middle East";if(lat>20&&lon>60&&lon<100)return"South Asia";
+  if(lat>20&&lon>100)return"East Asia";if(lat>35&&lon<-50)return"N. America";
+  if(lat>55&&lon<-10)return"N. Atlantic";if(lat<-10&&lon>100)return"Oceania";
+  if(lat>-15&&lat<15&&lon>20&&lon<55)return"E. Africa";if(lat<-15&&lon>10&&lon<55)return"S. Africa";
+  if(lat<-10&&lon>-80&&lon<-20)return"S. America";
+  // Ocean detection
+  if(lon>-180&&lon<-100&&lat>-60&&lat<60)return"Pacific Ocean";
+  if(lon>-80&&lon<0&&lat>-60&&lat<60)return"Atlantic Ocean";
+  if(lon>20&&lon<100&&lat<0&&lat>-60)return"Indian Ocean";
+  if(lat>70)return"Arctic";if(lat<-60)return"Southern Ocean";
+  return`${Math.abs(lat).toFixed(0)}°${lat>0?"N":"S"}, ${Math.abs(lon).toFixed(0)}°${lon>0?"E":"W"}`;
+}
+
+// ─── PROJECTION ───
+function proj(lat,lon,w,ht){const x=((lon+180)/360)*w,r=lat*Math.PI/180,y=ht/2-(Math.log(Math.tan(Math.PI/4+r/2))*w)/(2*Math.PI);return{x:Math.max(4,Math.min(w-4,x)),y:Math.max(8,Math.min(ht-8,y))}}
+function unproj(px,py,w,ht){const lon=(px/w)*360-180,m=(ht/2-py)*(2*Math.PI)/w,lat=(2*Math.atan(Math.exp(m))-Math.PI/2)*180/Math.PI;return[Math.max(-85,Math.min(85,lat)),Math.max(-180,Math.min(180,lon))]}
+
+// ─── CONTINENTS ───
+const CONT=[
+  [[70,0],[60,-10],[50,-10],[45,0],[40,-10],[35,-5],[30,30],[10,40],[0,10],[-5,12],[-15,12],[-25,15],[-35,18],[-35,30],[0,42],[10,35],[30,35],[35,25],[40,30],[42,42],[45,40],[50,40],[55,30],[60,30],[70,30]],
+  [[70,30],[70,60],[65,80],[60,90],[55,70],[50,80],[40,60],[35,50],[30,48],[25,55],[20,73],[10,77],[0,104],[10,106],[20,110],[25,100],[30,105],[35,105],[30,120],[35,130],[40,130],[45,140],[50,140],[55,135],[60,140],[65,130],[70,130],[75,100],[70,80]],
+  [[70,-170],[70,-140],[65,-140],[60,-135],[55,-130],[50,-125],[45,-125],[40,-120],[35,-120],[30,-115],[25,-110],[25,-100],[30,-90],[30,-80],[40,-75],[45,-65],[50,-60],[55,-60],[60,-45],[65,-40],[70,-50],[70,-90],[73,-95],[75,-120],[70,-160]],
+  [[10,-75],[10,-60],[5,-50],[0,-50],[-5,-35],[-10,-37],[-15,-40],[-20,-40],[-25,-48],[-30,-50],[-35,-57],[-40,-63],[-50,-70],[-55,-68],[-55,-75],[-45,-75],[-35,-70],[-20,-70],[-10,-78],[-5,-80],[0,-80],[5,-77]],
+  [[-15,130],[-20,115],[-25,114],[-30,115],[-35,117],[-37,140],[-35,150],[-30,153],[-25,153],[-20,148],[-15,145],[-12,137],[-12,131]],
+];
+
+// ─── MAP CANVAS ───
+function MapCanvas({route,width,height,animProg,fromPt,toPt,onMapClick,picking}){
+  const ref=useRef(null);
+  const click=useCallback(e=>{const r=e.target.getBoundingClientRect();const[lat,lon]=unproj(e.clientX-r.left,e.clientY-r.top,width,height);onMapClick(lat,lon);},[width,height,onMapClick]);
+
+  useEffect(()=>{
+    const c=ref.current;if(!c)return;const ctx=c.getContext("2d");const dpr=window.devicePixelRatio||1;
+    c.width=width*dpr;c.height=height*dpr;ctx.scale(dpr,dpr);
+    ctx.fillStyle="#0a0e17";ctx.fillRect(0,0,width,height);
+
+    // Grid
+    ctx.strokeStyle="rgba(0,174,239,0.05)";ctx.lineWidth=0.5;
+    for(let la=-80;la<=80;la+=20){const a=proj(la,-180,width,height),b=proj(la,180,width,height);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+    for(let lo=-180;lo<=180;lo+=30){ctx.beginPath();for(let la=-85;la<=85;la++){const p=proj(la,lo,width,height);la===-85?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);}ctx.stroke();}
+
+    // Continents
+    ctx.fillStyle="rgba(0,174,239,0.035)";ctx.strokeStyle="rgba(0,174,239,0.13)";ctx.lineWidth=0.7;
+    CONT.forEach(pts=>{ctx.beginPath();pts.forEach((p,i)=>{const q=proj(p[0],p[1],width,height);i===0?ctx.moveTo(q.x,q.y):ctx.lineTo(q.x,q.y);});ctx.closePath();ctx.fill();ctx.stroke();});
+
+    // Markers
+    if(fromPt){const p=proj(fromPt[0],fromPt[1],width,height);ctx.shadowColor="#00AEEF";ctx.shadowBlur=18;ctx.fillStyle="#00AEEF";ctx.globalAlpha=0.9;ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.fillStyle="#fff";ctx.font="bold 9px 'JetBrains Mono',monospace";ctx.fillText("FROM",p.x+12,p.y+3);}
+    if(toPt){const p=proj(toPt[0],toPt[1],width,height);ctx.shadowColor="#FFD43B";ctx.shadowBlur=18;ctx.fillStyle="#FFD43B";ctx.globalAlpha=0.9;ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.fillStyle="#fff";ctx.font="bold 9px 'JetBrains Mono',monospace";ctx.fillText("TO",p.x+12,p.y+3);}
+
+    // Route
+    if(route&&route.length){
+      const vis=Math.floor(animProg*route.length);const peakR=Math.min(...route.map(h=>h.resolution));
+      for(let i=0;i<vis-1&&i<route.length-1;i++){
+        const a=proj(route[i].centroid.lat,route[i].centroid.lon,width,height),b=proj(route[i+1].centroid.lat,route[i+1].centroid.lon,width,height);
+        if(Math.abs(a.x-b.x)>width*0.45)continue;
+        const col=DC[route[i+1].direction];
+        ctx.shadowColor=col;ctx.shadowBlur=16;ctx.strokeStyle=col;ctx.lineWidth=3;ctx.globalAlpha=0.4;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+        ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+      }
+      for(let i=0;i<vis&&i<route.length;i++){
+        const hp=route[i],p=proj(hp.centroid.lat,hp.centroid.lon,width,height),col=DC[hp.direction];
+        const term=hp.direction==="origin"||hp.direction==="destination",peak=hp.resolution===peakR&&hp.direction==="ascend";
+        const rad=term?7:peak?6:3.5;
+        ctx.shadowColor=col;ctx.shadowBlur=term?22:8;ctx.fillStyle=col;ctx.globalAlpha=0.9;ctx.beginPath();ctx.arc(p.x,p.y,rad,0,Math.PI*2);ctx.fill();
+        ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(p.x,p.y,rad*0.35,0,Math.PI*2);ctx.fill();
+        if(term||peak){ctx.font="bold 10px 'JetBrains Mono',monospace";ctx.fillStyle=col;ctx.fillText(peak?`R${hp.resolution} ★`:`R${hp.resolution}`,p.x+rad+5,p.y+3);}
+      }
+    }
+    if(picking&&!(route&&route.length)){ctx.globalAlpha=0.3;ctx.fillStyle="#fff";ctx.font="14px 'JetBrains Mono',monospace";const msg=!fromPt?"Click anywhere on Earth to place SENDER":"Click anywhere to place RECEIVER";const m=ctx.measureText(msg);ctx.fillText(msg,width/2-m.width/2,height/2);}
+    ctx.shadowBlur=0;ctx.globalAlpha=1;
+  },[route,width,height,animProg,fromPt,toPt,picking]);
+
+  return h("canvas",{ref,onClick:click,style:{width,height,borderRadius:8,cursor:picking?"crosshair":"default",border:"1px solid rgba(0,174,239,0.08)"}});
+}
+
+// ─── MAIN APP ───
+function App(){
+  const[fromPt,setFromPt]=useState(null),[toPt,setToPt]=useState(null),[route,setRoute]=useState(null);
+  const[anim,setAnim]=useState(0),[res,setRes]=useState(7),[picking,setPicking]=useState(true);
+  const animRef=useRef(null);
+
+  const doAnim=useCallback(hops=>{setAnim(0);if(animRef.current)cancelAnimationFrame(animRef.current);const t0=performance.now(),dur=Math.max(900,hops.length*130);const tick=now=>{const p=Math.min(1,(now-t0)/dur);setAnim(p);if(p<1)animRef.current=requestAnimationFrame(tick);};animRef.current=requestAnimationFrame(tick);},[]);
+
+  const doRoute=useCallback((f,t,r)=>{if(!f||!t)return;setPicking(false);const hops=computeRoute(f[0],f[1],t[0],t[1],r);setRoute(hops);doAnim(hops);},[doAnim]);
+
+  const mapClick=useCallback((lat,lon)=>{if(!picking)return;if(!fromPt){setFromPt([lat,lon]);}else{const t=[lat,lon];setToPt(t);doRoute(fromPt,t,res);}},[picking,fromPt,res,doRoute]);
+
+  const reset=()=>{setFromPt(null);setToPt(null);setRoute(null);setAnim(0);setPicking(true);};
+  const preset=p=>{setFromPt(p.from);setToPt(p.to);doRoute(p.from,p.to,res);};
+  const changeRes=r=>{setRes(r);if(fromPt&&toPt)doRoute(fromPt,toPt,r);};
+
+  const[ww,setWW]=useState(typeof window!=="undefined"?window.innerWidth:900);
+  useEffect(()=>{const h=()=>setWW(window.innerWidth);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h);},[]);
+
+  const peakR=route?Math.min(...route.map(hp=>hp.resolution)):null;
+  const distKm=fromPt&&toPt?haversineKm(fromPt[0],fromPt[1],toPt[0],toPt[1]):null;
+  const mw=Math.min(1100,ww-24);
+  const mh=Math.min(500,Math.max(300,mw*0.45));
+
+  return h("div",{style:{maxWidth:1140,margin:"0 auto",padding:"16px 12px"}},
+
+    // Header
+    h("div",{style:{textAlign:"center",marginBottom:16}},
+      h("div",{style:{fontSize:11,letterSpacing:8,color:"#00AEEF",opacity:0.6,marginBottom:4}},"GEOEPOCH PROTOCOL"),
+      h("h1",{style:{fontSize:Math.min(32,ww*0.045),fontWeight:800,margin:0,background:"linear-gradient(135deg,#00AEEF,#51CF66)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Route Visualizer"),
+      h("p",{style:{fontSize:11,color:"#4a5568",marginTop:6}},"Click any two points on Earth. Watch GEP route between them using pure geometry."),
+    ),
+
+    // Presets
+    h("div",{style:{display:"flex",gap:6,justifyContent:"center",flexWrap:"wrap",marginBottom:10}},
+      ...PRESETS.map(p=>h("button",{key:p.label,onClick:()=>preset(p),style:{background:"rgba(0,174,239,0.06)",border:"1px solid rgba(0,174,239,0.15)",color:"#00AEEF",padding:"5px 12px",borderRadius:4,fontSize:11}},p.label))
+    ),
+
+    // Controls
+    h("div",{style:{display:"flex",gap:8,justifyContent:"center",alignItems:"center",marginBottom:8,flexWrap:"wrap"}},
+      h("button",{onClick:reset,style:{background:"rgba(255,107,107,0.1)",border:"1px solid rgba(255,107,107,0.3)",color:"#FF6B6B",padding:"5px 14px",borderRadius:4,fontSize:11}},"RESET"),
+      h("span",{style:{fontSize:10,color:"#636E72"}},"Resolution:"),
+      ...[5,7,9].map(r=>h("button",{key:r,onClick:()=>changeRes(r),style:{background:res===r?"rgba(0,174,239,0.2)":"transparent",border:`1px solid ${res===r?"#00AEEF":"rgba(0,174,239,0.1)"}`,color:res===r?"#fff":"#00AEEF",padding:"4px 10px",borderRadius:3,fontSize:11}},`R${r}`)),
+      fromPt&&h("span",{style:{fontSize:10,color:"#00AEEF"}},`FROM: ${fromPt[0].toFixed(1)}°, ${fromPt[1].toFixed(1)}°`),
+      toPt&&h("span",{style:{fontSize:10,color:"#FFD43B"}},`TO: ${toPt[0].toFixed(1)}°, ${toPt[1].toFixed(1)}°`),
+      distKm&&h("span",{style:{fontSize:10,color:"#51CF66"}},`${distKm.toFixed(0)} km`),
+    ),
+
+    // Instruction
+    picking&&h("div",{style:{textAlign:"center",fontSize:12,marginBottom:6,color:fromPt?"#FFD43B":"#00AEEF"}},!fromPt?"⬇ Click the map to place SENDER":"⬇ Click the map to place RECEIVER"),
+
+    // Map
+    h("div",{style:{display:"flex",justifyContent:"center",marginBottom:10}},
+      h(MapCanvas,{route,width:mw,height:mh,animProg:anim,fromPt,toPt,onMapClick:mapClick,picking})
+    ),
+
+    // Legend
+    h("div",{style:{display:"flex",gap:16,justifyContent:"center",marginBottom:14,flexWrap:"wrap"}},
+      ...Object.entries(DC).map(([d,c])=>h("div",{key:d,style:{display:"flex",alignItems:"center",gap:5}},
+        h("div",{style:{width:8,height:8,borderRadius:"50%",background:c,boxShadow:`0 0 6px ${c}`}}),
+        h("span",{style:{fontSize:10,color:"#636E72",letterSpacing:1}},DL[d])
+      ))
+    ),
+
+    // Stats + Trace
+    route&&h("div",{style:{maxWidth:800,margin:"0 auto",background:"rgba(0,174,239,0.03)",border:"1px solid rgba(0,174,239,0.08)",borderRadius:8,padding:14}},
+      h("div",{style:{display:"flex",justifyContent:"center",gap:20,marginBottom:12,flexWrap:"wrap"}},
+        ...[["HOPS",route.length,"#00AEEF"],["PEAK",`R${peakR}`,"#FFD43B"],["ASCEND",route.filter(hp=>hp.direction==="ascend").length,"#FF6B6B"],["DESCEND",route.filter(hp=>hp.direction==="descend").length,"#51CF66"],["DISTANCE",`${distKm?.toFixed(0)} km`,"#00AEEF"]].map(([l,v,c])=>
+          h("div",{key:l,style:{textAlign:"center"}},
+            h("div",{style:{fontSize:9,color:"#636E72",letterSpacing:1}},l),
+            h("div",{style:{fontSize:14,fontWeight:700,color:c}},v)
+          )
+        )
+      ),
+      h("div",{style:{fontSize:9,color:"#636E72",letterSpacing:1,marginBottom:8}},"ROUTING TRACE"),
+      h("div",{style:{maxHeight:340,overflowY:"auto"}},
+        ...route.map((hp,i)=>{
+          const op=anim>=(i+1)/route.length?1:0.1;const pk=hp.resolution===peakR&&hp.direction==="ascend";
+          return h("div",{key:i,style:{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",background:pk?"rgba(255,212,59,0.06)":i%2===0?"rgba(255,255,255,0.012)":"transparent",borderRadius:3,opacity:op,transition:"opacity 0.3s",borderLeft:pk?"2px solid #FFD43B":"2px solid transparent"}},
+            h("div",{style:{width:7,height:7,borderRadius:"50%",background:DC[hp.direction],boxShadow:`0 0 4px ${DC[hp.direction]}`,flexShrink:0}}),
+            h("span",{style:{width:30,fontSize:12,color:DC[hp.direction],fontWeight:700}},`R${hp.resolution}`),
+            h("span",{style:{fontSize:9,padding:"2px 8px",borderRadius:3,background:`${DC[hp.direction]}18`,color:DC[hp.direction],width:76,textAlign:"center",display:"inline-block"}},DL[hp.direction]),
+            h("span",{style:{fontSize:11,color:"#b0b8c1",flex:1,fontWeight:pk?600:400}},`${geoLabel(hp.centroid.lat,hp.centroid.lon,hp.resolution,hp.direction)} ${pk?"★":""}`),
+            h("span",{style:{fontSize:10,color:"#4a5568"}},`${hp.centroid.lat.toFixed(1)}°, ${hp.centroid.lon.toFixed(1)}°`),
+            h("span",{style:{fontSize:9,color:"#2d3748",marginLeft:4}},hp.cellHash),
+          );
+        })
+      )
+    ),
+
+    // Footer
+    h("div",{style:{textAlign:"center",marginTop:20,fontSize:9,color:"#2d3748",lineHeight:1.8}},
+      "GEP v1 · GNS Foundation / ULISSY s.r.l.",h("br"),
+      "Place = H3 Cell · Address = Epoch Chain · Routing = Geometry",h("br"),
+      "Genesis: 26acb5d998b63d54f2ed92851c5c565db9fe0930fc06b06091d05c0ce4ff8289",h("br"),
+      h("a",{href:"https://github.com/GNS-Foundation/gep-core",target:"_blank",rel:"noopener",style:{color:"#00AEEF",textDecoration:"none"}},"github.com/GNS-Foundation/gep-core"),
+      " · ",
+      h("a",{href:"https://gcrumbs.com",target:"_blank",rel:"noopener",style:{color:"#00AEEF",textDecoration:"none"}},"gcrumbs.com"),
+    ),
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("app")).render(h(App));
+</script>
+</body>
+</html>
