@@ -276,15 +276,25 @@ function copyCoords(which,btn){
   var pt=which==='from'?fromPt:toPt;
   if(!pt)return;
   var text=pt[0].toFixed(6)+', '+pt[1].toFixed(6);
-  navigator.clipboard.writeText(text).then(function(){
-    btn.textContent='✓';
-    setTimeout(function(){btn.textContent='📋';},1200);
-  }).catch(function(){
-    // Fallback for older browsers
-    var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
-    btn.textContent='✓';
-    setTimeout(function(){btn.textContent='📋';},1200);
-  });
+  var ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.position='fixed';
+  ta.style.left='-9999px';
+  ta.style.top='-9999px';
+  ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  var ok=false;
+  try{ok=document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+  if(ok){
+    btn.textContent='✓ Copied';
+    btn.style.color='#51CF66';
+    setTimeout(function(){btn.textContent='📋';btn.style.color='';},1500);
+  }else{
+    window.prompt('Copy these coordinates:',text);
+  }
 }
 function doReset(){
   fromPt=null;toPt=null;route=null;
