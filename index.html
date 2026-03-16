@@ -213,7 +213,7 @@ function setFrom(lat,lon,name){
   fromPt=[lat,lon];if(fromMarker)fromMarker.remove();
   fromMarker=new mapboxgl.Marker({element:mkEl('#00AEEF')}).setLngLat([lon,lat]).addTo(map);
   document.getElementById('fromInput').value=name||lat.toFixed(4)+', '+lon.toFixed(4);
-  document.getElementById('fromCoords').textContent='Lat '+lat.toFixed(6)+'° — Lon '+lon.toFixed(6)+'°';
+  document.getElementById('fromCoords').textContent=lat.toFixed(6)+', '+lon.toFixed(6);
   document.getElementById('coordsBar').style.display='flex';
   updInst();
 }
@@ -221,7 +221,7 @@ function setTo(lat,lon,name){
   toPt=[lat,lon];if(toMarker)toMarker.remove();
   toMarker=new mapboxgl.Marker({element:mkEl('#FFD43B')}).setLngLat([lon,lat]).addTo(map);
   document.getElementById('toInput').value=name||lat.toFixed(4)+', '+lon.toFixed(4);
-  document.getElementById('toCoords').textContent='Lat '+lat.toFixed(6)+'° — Lon '+lon.toFixed(6)+'°';
+  document.getElementById('toCoords').textContent=lat.toFixed(6)+', '+lon.toFixed(6);
   document.getElementById('coordsBar').style.display='flex';
   updInst();
 }
