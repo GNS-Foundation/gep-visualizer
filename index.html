@@ -70,59 +70,14 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
-<div class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">🌙</div>
-<div style="max-width:1200px;margin:0 auto;padding:16px 14px">
+<div style="max-width:1200px;margin:0 auto;padding:10px 14px">
   <div style="text-align:center;margin-bottom:14px">
     <div style="font-size:12px;letter-spacing:7px;color:var(--accent);opacity:.7;margin-bottom:4px">GEOEPOCH PROTOCOL</div>
-    <h1 style="font-size:32px;font-weight:800;margin:0;background:linear-gradient(135deg,#00AEEF,#51CF66);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Route Visualizer</h1>
-    <p class="hero-tagline"><em>IP addresses</em> are logical entities — assigned by authorities, governed by institutions, limited by design. They tell computers how to find each other, but they know nothing about <em>where</em> things actually are.<br><br>The Earth already has 569 trillion unique points. Why invent addresses when geography gives them to us for free?<br><br>Welcome to <em>GEP</em>.</p>
-    <div class="hero-compare">
-      <span class="chip"><b>IP</b> = assigned by IANA · expires · abstract</span>
-      <span class="chip" style="border-color:var(--accent)"><b>GEP</b> = derived from geometry · permanent · physical</span>
-    </div>
-    <p style="font-size:13px;color:var(--text4);margin-top:4px">Click two places on Earth. Watch GEP route between them — no servers, no DNS, no lookup tables. Just math.</p>
-    <div style="text-align:center;margin:8px 0">
-      <div class="math-toggle" onclick="toggleMath()"><span>📐 The Math Behind GEP</span><span class="arrow" id="mathArrow">▼</span></div>
-    </div>
+    <h1 style="font-size:28px;font-weight:800;margin:0;background:linear-gradient(135deg,#00AEEF,#51CF66);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Route Visualizer</h1>
+    <p style="font-size:12px;color:var(--text3);margin-top:4px">Clicca due punti sulla Terra. Guarda il routing GEP — zero server, zero DNS. Solo matematica.</p>
   </div>
 
-  <!-- THE MATH -->
-  <div class="math-panel" id="mathPanel">
-    <h3>How GEP Addresses the Entire Earth</h3>
-    <p>GEP uses Uber's H3 hexagonal grid to divide the Earth into cells at 16 resolutions (R0–R15). Each resolution is exactly 7× more precise than the previous — a mathematical property of hexagonal tessellation.</p>
-    <h4>THE CORE FORMULA</h4>
-    <div class="formula">c(r) = 2 + 120 × 7<sup>r</sup></div>
-    <p>Where <b>c(r)</b> is the number of cells at resolution <b>r</b>. At R0 (continent scale), Earth has 122 cells. At R15 (sub-meter), it has <b>569 trillion</b>.</p>
-    <h4>RESOLUTION TABLE</h4>
-    <table class="table">
-      <tr><th>RES</th><th>CELLS</th><th>SCALE</th><th>CELL SIZE</th><th>ANALOGY</th></tr>
-      <tr><td>R0</td><td>122</td><td>Continent</td><td>1,107 km</td><td>Like a country code (+1, +39)</td></tr>
-      <tr><td>R5</td><td>2,016,842</td><td>City</td><td>8.5 km</td><td>Like an area code (212, 06)</td></tr>
-      <tr><td>R7</td><td>98,825,162</td><td>Neighborhood</td><td>1.22 km</td><td>Like a zip code</td></tr>
-      <tr><td>R10</td><td>33.9 billion</td><td>Street address</td><td>65 m</td><td>Like a street number</td></tr>
-      <tr><td>R15</td><td>569 trillion</td><td>Sub-meter</td><td>0.5 m</td><td>Like a desk in a room</td></tr>
-    </table>
-    <h4>ROUTING: PURE GEOMETRY</h4>
-    <p>GEP routes packets between any two points on Earth by finding their <b>Lowest Common Ancestor</b> in the H3 hierarchy — the coarsest resolution where both points share the same parent cell.</p>
-    <div class="formula">Route(A → B) = Ascend(A, R<sub>ancestor</sub>) + Descend(R<sub>ancestor</sub>, B)</div>
-    <p>The algorithm ascends from the sender's resolution to the common ancestor, then descends to the receiver. Zero external state. Zero routing tables. O(R) time complexity.</p>
-    <div class="insight">
-      <em>The key insight:</em> Unlike IP routing which requires BGP tables, DNS lookups, and peering agreements — GEP routing is <em>algorithmic</em>. Given any two coordinates on Earth, the route is <em>deterministic</em> and computable by any node with nothing but the H3 library and basic geometry.
-    </div>
-    <h4>EPOCH CHAIN: CRYPTOGRAPHIC ADDRESSING</h4>
-    <p>Each H3 cell's index is SHA-256 hashed to produce a permanent, collision-resistant address called a <b>GEA</b> (GeoEpoch Address):</p>
-    <div class="formula">GEA = "gea:" + Resolution + ":" + SHA256(H3CellIndex)</div>
-    <p>These hashes are chained across resolutions into an <b>Epoch Chain</b> — a Merkle-like structure where each resolution's hash commits to all cells at that level. The genesis hash anchors the entire system:</p>
-    <div class="formula" style="font-size:12px;color:var(--yellow)">Genesis: 26acb5d998b63d54f2ed92851c5c565db9fe0930fc06b06091d05c0ce4ff8289</div>
-    <div class="insight">
-      <em>Think of it this way:</em> IP addresses are assigned by IANA, a human institution. GEP addresses are <em>derived from geometry</em> — they existed before anyone computed them. The Colosseum's GEA has been deterministic since the H3 grid was defined. Nobody assigns it. Mathematics guarantees it.
-    </div>
-    <h4>PATENT PENDING</h4>
-    <p style="color:var(--text3);font-size:12px">Five innovations identified. Related to Provisional Patent #63/948,788.<br>
-    <a href="https://github.com/GNS-Foundation/gep-core" target="_blank">github.com/GNS-Foundation/gep-core</a> · 
-    <a href="/create" style="color:var(--green)">Create a GEPSite →</a></p>
-  </div>
-  <div id="presets" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px"></div>
+  <div id="presets" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:8px"></div>
   <div style="display:flex;gap:12px;justify-content:center;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px">
     <div class="search-box"><span class="icon">📍</span><input type="text" id="fromInput" placeholder="Sender — search address or click map"><div class="results" id="fromResults"></div></div>
     <span style="color:var(--text3);font-size:20px;padding-top:8px">→</span>
@@ -135,19 +90,12 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
     <span id="distLabel" style="font-size:12px;color:var(--green);font-weight:600"></span>
   </div>
   <div id="instruction" style="text-align:center;font-size:14px;margin-bottom:8px;color:var(--accent)">Loading map...</div>
-  <div id="map" style="height:500px;margin-bottom:12px"></div>
+  <div id="map" style="height:calc(100vh - 260px);min-height:400px;margin-bottom:10px"></div>
   <div style="display:flex;gap:18px;justify-content:center;margin-bottom:14px;flex-wrap:wrap" id="legend"></div>
   <div id="routePanel" class="route-panel" style="display:none">
     <div id="stats" style="display:flex;justify-content:center;gap:24px;margin-bottom:12px;flex-wrap:wrap"></div>
     <div style="font-size:11px;color:var(--text3);letter-spacing:1.5px;margin-bottom:8px">ROUTING TRACE</div>
     <div id="hops" style="max-height:360px;overflow-y:auto"></div>
-  </div>
-  <div class="footer">
-    GEP v1 · GNS Foundation / ULISSY s.r.l. · Patent Pending<br>
-    Every point on Earth has a permanent address. Every address has a route. No servers required.<br>
-    <a href="https://github.com/GNS-Foundation/gep-core" target="_blank">GitHub</a>
-    · <a href="https://gcrumbs.com" target="_blank">GCRUMBS App</a>
-    · <a href="/create" style="color:#51CF66;font-weight:700">+ Create GEPSite</a>
   </div>
 </div>
 
