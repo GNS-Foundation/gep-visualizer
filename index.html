@@ -89,18 +89,24 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
     <div id="resButtons" style="display:inline-flex;gap:5px"></div>
     <span id="distLabel" style="font-size:12px;color:var(--green);font-weight:600"></span>
   </div>
-  <div id="instruction" style="text-align:center;font-size:14px;margin-bottom:8px;color:var(--accent)">Loading map...</div>
-  <div id="map" style="height:calc(100vh - 260px);min-height:400px;margin-bottom:10px"></div>
-  <div id="coordsBar" style="display:none;justify-content:center;gap:32px;flex-wrap:wrap;margin-bottom:10px;padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:8px;max-width:800px;margin-left:auto;margin-right:auto">
+  <div id="coordsBar" style="display:none;justify-content:center;gap:32px;flex-wrap:wrap;margin-bottom:8px;padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:8px;max-width:800px;margin-left:auto;margin-right:auto">
     <div style="text-align:center">
       <div style="font-size:10px;color:var(--accent);letter-spacing:2px;margin-bottom:3px">📍 SENDER</div>
-      <div id="fromCoords" style="font-size:13px;color:var(--text);font-weight:600">—</div>
+      <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+        <span id="fromCoords" style="font-size:13px;color:var(--text);font-weight:600">—</span>
+        <button onclick="copyCoords('from')" title="Copy coordinates" style="background:rgba(0,174,239,.1);border:1px solid rgba(0,174,239,.2);color:var(--accent);padding:3px 7px;border-radius:4px;font-size:11px;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(0,174,239,.25)'" onmouseout="this.style.background='rgba(0,174,239,.1)'">📋</button>
+      </div>
     </div>
     <div style="text-align:center">
       <div style="font-size:10px;color:var(--yellow);letter-spacing:2px;margin-bottom:3px">🎯 RECEIVER</div>
-      <div id="toCoords" style="font-size:13px;color:var(--text);font-weight:600">—</div>
+      <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+        <span id="toCoords" style="font-size:13px;color:var(--text);font-weight:600">—</span>
+        <button onclick="copyCoords('to')" title="Copy coordinates" style="background:rgba(0,174,239,.1);border:1px solid rgba(0,174,239,.2);color:var(--accent);padding:3px 7px;border-radius:4px;font-size:11px;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(0,174,239,.25)'" onmouseout="this.style.background='rgba(0,174,239,.1)'">📋</button>
+      </div>
     </div>
   </div>
+  <div id="instruction" style="text-align:center;font-size:14px;margin-bottom:8px;color:var(--accent)">Loading map...</div>
+  <div id="map" style="height:calc(100vh - 260px);min-height:400px;margin-bottom:10px"></div>
   <div style="display:flex;gap:18px;justify-content:center;margin-bottom:14px;flex-wrap:wrap" id="legend"></div>
   <div id="routePanel" class="route-panel" style="display:none">
     <div id="stats" style="display:flex;justify-content:center;gap:24px;margin-bottom:12px;flex-wrap:wrap"></div>
@@ -265,6 +271,15 @@ function runRoute(){
   setTimeout(function(){animRoute(route)},500);
   document.getElementById('routePanel').style.display='block';
   renderStats(route,dist);updInst();
+}
+function copyCoords(which){
+  var pt=which==='from'?fromPt:toPt;
+  if(!pt)return;
+  var text=pt[0].toFixed(6)+', '+pt[1].toFixed(6);
+  navigator.clipboard.writeText(text).then(function(){
+    var btn=event.target;var orig=btn.textContent;btn.textContent='✓';
+    setTimeout(function(){btn.textContent=orig;},1200);
+  });
 }
 function doReset(){
   fromPt=null;toPt=null;route=null;
