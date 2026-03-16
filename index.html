@@ -91,6 +91,16 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
   </div>
   <div id="instruction" style="text-align:center;font-size:14px;margin-bottom:8px;color:var(--accent)">Loading map...</div>
   <div id="map" style="height:calc(100vh - 260px);min-height:400px;margin-bottom:10px"></div>
+  <div id="coordsBar" style="display:none;justify-content:center;gap:32px;flex-wrap:wrap;margin-bottom:10px;padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:8px;max-width:800px;margin-left:auto;margin-right:auto">
+    <div style="text-align:center">
+      <div style="font-size:10px;color:var(--accent);letter-spacing:2px;margin-bottom:3px">📍 SENDER</div>
+      <div id="fromCoords" style="font-size:13px;color:var(--text);font-weight:600">—</div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:10px;color:var(--yellow);letter-spacing:2px;margin-bottom:3px">🎯 RECEIVER</div>
+      <div id="toCoords" style="font-size:13px;color:var(--text);font-weight:600">—</div>
+    </div>
+  </div>
   <div style="display:flex;gap:18px;justify-content:center;margin-bottom:14px;flex-wrap:wrap" id="legend"></div>
   <div id="routePanel" class="route-panel" style="display:none">
     <div id="stats" style="display:flex;justify-content:center;gap:24px;margin-bottom:12px;flex-wrap:wrap"></div>
@@ -196,12 +206,18 @@ function mkEl(color){var el=document.createElement('div');el.style.cssText='widt
 function setFrom(lat,lon,name){
   fromPt=[lat,lon];if(fromMarker)fromMarker.remove();
   fromMarker=new mapboxgl.Marker({element:mkEl('#00AEEF')}).setLngLat([lon,lat]).addTo(map);
-  document.getElementById('fromInput').value=name||lat.toFixed(4)+', '+lon.toFixed(4);updInst();
+  document.getElementById('fromInput').value=name||lat.toFixed(4)+', '+lon.toFixed(4);
+  document.getElementById('fromCoords').textContent='Lat '+lat.toFixed(6)+'° — Lon '+lon.toFixed(6)+'°';
+  document.getElementById('coordsBar').style.display='flex';
+  updInst();
 }
 function setTo(lat,lon,name){
   toPt=[lat,lon];if(toMarker)toMarker.remove();
   toMarker=new mapboxgl.Marker({element:mkEl('#FFD43B')}).setLngLat([lon,lat]).addTo(map);
-  document.getElementById('toInput').value=name||lat.toFixed(4)+', '+lon.toFixed(4);updInst();
+  document.getElementById('toInput').value=name||lat.toFixed(4)+', '+lon.toFixed(4);
+  document.getElementById('toCoords').textContent='Lat '+lat.toFixed(6)+'° — Lon '+lon.toFixed(6)+'°';
+  document.getElementById('coordsBar').style.display='flex';
+  updInst();
 }
 function updInst(){
   var el=document.getElementById('instruction');
@@ -261,6 +277,9 @@ function doReset(){
   document.getElementById('distLabel').textContent='';
   document.getElementById('stats').innerHTML='';
   document.getElementById('hops').innerHTML='';
+  document.getElementById('fromCoords').textContent='—';
+  document.getElementById('toCoords').textContent='—';
+  document.getElementById('coordsBar').style.display='none';
   updInst();map.flyTo({center:[20,25],zoom:1.8,duration:800});
 }
 document.getElementById('resetBtn').onclick=doReset;
