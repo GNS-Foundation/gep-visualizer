@@ -70,37 +70,28 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
-<div style="max-width:1200px;margin:0 auto;padding:10px 14px">
-  <div style="text-align:center;margin-bottom:14px">
-    <div style="font-size:12px;letter-spacing:7px;color:var(--accent);opacity:.7;margin-bottom:4px">GEOEPOCH PROTOCOL</div>
-    <h1 style="font-size:28px;font-weight:800;margin:0;background:linear-gradient(135deg,#00AEEF,#51CF66);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Route Visualizer</h1>
-    <p style="font-size:12px;color:var(--text3);margin-top:4px">Click two points on Earth. Watch GEP route between them — no servers, no DNS. Just math.</p>
-  </div>
-
-  <div id="presets" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:8px"></div>
-  <div style="display:flex;gap:12px;justify-content:center;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px">
+<div style="max-width:1200px;margin:0 auto;padding:6px 14px">
+  <div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:6px">
     <div class="search-box"><span class="icon">📍</span><input type="text" id="fromInput" placeholder="Sender — search address or click map"><div class="results" id="fromResults"></div></div>
-    <span style="color:var(--text3);font-size:20px;padding-top:8px">→</span>
+    <span style="color:var(--text3);font-size:18px">→</span>
     <div class="search-box"><span class="icon">🎯</span><input type="text" id="toInput" placeholder="Receiver — search address or click map"><div class="results" id="toResults"></div></div>
-  </div>
-  <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:12px">
-    <button id="resetBtn" style="background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:var(--red);padding:6px 16px;border-radius:6px;font-size:13px">RESET</button>
-    <span style="font-size:12px;color:var(--text3)">Resolution:</span>
-    <div id="resButtons" style="display:inline-flex;gap:5px"></div>
+    <button id="resetBtn" style="background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:var(--red);padding:6px 12px;border-radius:6px;font-size:12px">RESET</button>
+    <div id="resButtons" style="display:inline-flex;gap:4px"></div>
     <span id="distLabel" style="font-size:12px;color:var(--green);font-weight:600"></span>
   </div>
-  <div id="coordsBar" style="display:none;justify-content:center;gap:32px;flex-wrap:wrap;margin-bottom:8px;padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:8px;max-width:800px;margin-left:auto;margin-right:auto">
-    <div style="text-align:center">
-      <div style="font-size:10px;color:var(--accent);letter-spacing:2px;margin-bottom:3px">📍 SENDER <span style="font-size:9px;opacity:.5">(click to copy)</span></div>
-      <div id="fromCoords" style="font-size:13px;color:var(--text);font-weight:600;cursor:pointer;padding:4px 8px;border-radius:4px;transition:background .2s;user-select:all">—</div>
+  <div id="presets" style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:4px"></div>
+  <div id="coordsBar" style="display:none;justify-content:center;gap:28px;flex-wrap:wrap;margin-bottom:4px;padding:5px 14px;background:var(--card);border:1px solid var(--border);border-radius:6px;max-width:700px;margin-left:auto;margin-right:auto">
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:10px;color:var(--accent)">📍</span>
+      <span id="fromCoords" style="font-size:12px;color:var(--text);font-weight:600;cursor:pointer;user-select:all">—</span>
     </div>
-    <div style="text-align:center">
-      <div style="font-size:10px;color:var(--yellow);letter-spacing:2px;margin-bottom:3px">🎯 RECEIVER <span style="font-size:9px;opacity:.5">(click to copy)</span></div>
-      <div id="toCoords" style="font-size:13px;color:var(--text);font-weight:600;cursor:pointer;padding:4px 8px;border-radius:4px;transition:background .2s;user-select:all">—</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:10px;color:var(--yellow)">🎯</span>
+      <span id="toCoords" style="font-size:12px;color:var(--text);font-weight:600;cursor:pointer;user-select:all">—</span>
     </div>
   </div>
-  <div id="instruction" style="text-align:center;font-size:14px;margin-bottom:8px;color:var(--accent)">Loading map...</div>
-  <div id="map" style="height:calc(100vh - 260px);min-height:400px;margin-bottom:10px"></div>
+  <div id="instruction" style="text-align:center;font-size:13px;margin-bottom:4px;color:var(--accent)">Loading map...</div>
+  <div id="map" style="height:calc(100vh - 160px);min-height:400px;margin-bottom:6px"></div>
   <div style="display:flex;gap:18px;justify-content:center;margin-bottom:14px;flex-wrap:wrap" id="legend"></div>
   <div id="routePanel" class="route-panel" style="display:none">
     <div id="stats" style="display:flex;justify-content:center;gap:24px;margin-bottom:12px;flex-wrap:wrap"></div>
