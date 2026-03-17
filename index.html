@@ -67,6 +67,13 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .math-panel .table td:first-child{color:var(--accent);font-weight:700}
 .math-panel .insight{background:rgba(0,174,239,.04);border-left:3px solid var(--accent);padding:12px 16px;margin:12px 0;font-size:13px;color:var(--text2);line-height:1.6;border-radius:0 8px 8px 0}
 .math-panel .insight em{color:var(--accent);font-style:normal}
+/* Verified org popup styling */
+.gep-org-popup .mapboxgl-popup-content{background:rgba(8,12,20,.95);border:1px solid rgba(0,174,239,.15);border-radius:10px;padding:14px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.gep-org-popup .mapboxgl-popup-tip{border-top-color:rgba(8,12,20,.95)}
+.gep-org-popup .mapboxgl-popup-close-button{color:#636E72;font-size:18px;padding:4px 8px}
+.gep-org-popup .mapboxgl-popup-close-button:hover{color:#e0e6ed;background:transparent}
+[data-theme="light"] .gep-org-popup .mapboxgl-popup-content{background:rgba(255,255,255,.97);border-color:rgba(0,0,0,.1);box-shadow:0 4px 20px rgba(0,0,0,.12)}
+[data-theme="light"] .gep-org-popup .mapboxgl-popup-tip{border-top-color:rgba(255,255,255,.97)}
 </style>
 </head>
 <body>
@@ -76,6 +83,7 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
     <span style="color:var(--text3);font-size:18px">→</span>
     <div class="search-box"><span class="icon">🎯</span><input type="text" id="toInput" placeholder="Receiver — search address or click map"><div class="results" id="toResults"></div></div>
     <button id="resetBtn" style="background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:var(--red);padding:6px 12px;border-radius:6px;font-size:12px">RESET</button>
+    <button id="orgsToggle" onclick="toggleVerifiedOrgs()" title="Toggle verified sites" style="background:rgba(29,158,117,.15);border:1px solid rgba(29,158,117,.3);color:#1D9E75;padding:6px 12px;border-radius:6px;font-size:12px">✓ SITES</button>
     <div id="resButtons" style="display:inline-flex;gap:4px"></div>
     <span id="distLabel" style="font-size:12px;color:var(--green);font-weight:600"></span>
   </div>
@@ -160,7 +168,64 @@ map.on('style.load',function(){
   if(toPt&&toMarker){toMarker.remove();toMarker=new mapboxgl.Marker({element:mkEl('#FFD43B')}).setLngLat([toPt[1],toPt[0]]).addTo(map);}
   // Re-draw route if exists
   if(route)setTimeout(function(){drawRoute(route,1);},200);
+  // Reload verified orgs layer after style change
+  if(orgsVisible&&!map.getSource('verified-orgs'))setTimeout(function(){loadVerifiedOrgs()},600);
 });
+
+// ===========================================
+// VERIFIED ORGS MAP LAYER
+// ===========================================
+var VERIFIED_API='https://gns-browser-production.up.railway.app/gep/verified-sites';
+var orgsVisible=true;
+map.on('load',function(){loadVerifiedOrgs();});
+function loadVerifiedOrgs(){
+  fetch(VERIFIED_API).then(function(r){return r.json()}).then(function(geojson){
+    if(!geojson.features||geojson.features.length===0){console.log('[GEP] No verified sites');return;}
+    console.log('[GEP] Loaded '+geojson.features.length+' verified sites');
+    addVerifiedOrgsLayers(geojson);
+  }).catch(function(err){console.warn('[GEP] Failed to load verified sites:',err);});
+}
+function addVerifiedOrgsLayers(geojson){
+  ['verified-orgs-pins-label','verified-orgs-pins','verified-orgs-count','verified-orgs-clusters'].forEach(function(id){if(map.getLayer(id))map.removeLayer(id);});
+  if(map.getSource('verified-orgs'))map.removeSource('verified-orgs');
+  map.addSource('verified-orgs',{type:'geojson',data:geojson,cluster:true,clusterMaxZoom:11,clusterRadius:50});
+  map.addLayer({id:'verified-orgs-clusters',type:'circle',source:'verified-orgs',filter:['has','point_count'],paint:{'circle-color':['step',['get','point_count'],'#1D9E75',10,'#534AB7',50,'#D85A30'],'circle-radius':['step',['get','point_count'],16,10,22,50,28],'circle-opacity':.85,'circle-stroke-width':2,'circle-stroke-color':'rgba(255,255,255,0.6)'}});
+  map.addLayer({id:'verified-orgs-count',type:'symbol',source:'verified-orgs',filter:['has','point_count'],layout:{'text-field':['get','point_count_abbreviated'],'text-font':['DIN Pro Bold','Arial Unicode MS Bold'],'text-size':12},paint:{'text-color':'#ffffff'}});
+  map.addLayer({id:'verified-orgs-pins',type:'circle',source:'verified-orgs',filter:['!',['has','point_count']],paint:{'circle-radius':8,'circle-color':'#1D9E75','circle-stroke-width':2.5,'circle-stroke-color':'#ffffff','circle-opacity':.9}});
+  var hc=document.documentElement.getAttribute('data-theme')==='dark'?'#080c14':'#f5f7fa';
+  map.addLayer({id:'verified-orgs-pins-label',type:'symbol',source:'verified-orgs',filter:['!',['has','point_count']],layout:{'text-field':['get','name'],'text-font':['DIN Pro Medium','Arial Unicode MS Regular'],'text-size':11,'text-offset':[0,1.8],'text-anchor':'top','text-max-width':12,'text-optional':true},paint:{'text-color':'#ffffff','text-halo-color':hc,'text-halo-width':1.5}});
+  map.on('click','verified-orgs-clusters',function(e){
+    var ft=map.queryRenderedFeatures(e.point,{layers:['verified-orgs-clusters']});if(!ft.length)return;
+    var cid=ft[0].properties.cluster_id;
+    map.getSource('verified-orgs').getClusterExpansionZoom(cid,function(err,z){if(err)return;map.easeTo({center:ft[0].geometry.coordinates,zoom:z,duration:500});});
+  });
+  map.on('click','verified-orgs-pins',function(e){
+    var ft=map.queryRenderedFeatures(e.point,{layers:['verified-orgs-pins']});if(!ft.length)return;
+    var p=ft[0].properties,co=ft[0].geometry.coordinates.slice();
+    var tier=p.tier==='sovereign'?'<span style="background:rgba(255,212,59,.15);color:#FFD43B;padding:2px 8px;border-radius:4px;font-size:10px;letter-spacing:1px">\uD83D\uDC51 SOVEREIGN</span>':'<span style="background:rgba(29,158,117,.15);color:#1D9E75;padding:2px 8px;border-radius:4px;font-size:10px;letter-spacing:1px">\u2713 VERIFIED</span>';
+    var handle=p.handle?'<div style="font-size:12px;color:#00AEEF;margin-top:2px">@'+p.handle+'</div>':'';
+    var desc=p.description?'<div style="font-size:12px;color:#b0b8c1;margin-top:6px;line-height:1.5;max-height:48px;overflow:hidden">'+p.description+'</div>':'';
+    var html='<div style="font-family:\'JetBrains Mono\',monospace;min-width:220px;max-width:280px">'
+      +'<div style="font-size:15px;font-weight:700;color:#e0e6ed;margin-bottom:8px">'+(p.name||p.domain)+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+tier+'<span style="font-size:11px;color:#636E72">'+p.domain+'</span></div>'
+      +handle+desc
+      +'<div style="margin-top:10px;display:flex;gap:6px">'
+      +'<a href="'+p.url+'" target="_blank" rel="noopener" style="flex:1;display:block;text-align:center;padding:8px 12px;background:#1D9E75;color:#fff;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:.5px">OPEN GSITE</a>'
+      +'<a href="'+p.url+'" target="_blank" rel="noopener" style="display:block;padding:8px 12px;background:rgba(0,174,239,.15);color:#00AEEF;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none">\u2197 WEB</a>'
+      +'</div></div>';
+    new mapboxgl.Popup({closeButton:true,closeOnClick:true,maxWidth:'300px',className:'gep-org-popup'}).setLngLat(co).setHTML(html).addTo(map);
+  });
+  map.on('mouseenter','verified-orgs-clusters',function(){map.getCanvas().style.cursor='pointer';});
+  map.on('mouseleave','verified-orgs-clusters',function(){map.getCanvas().style.cursor='';});
+  map.on('mouseenter','verified-orgs-pins',function(){map.getCanvas().style.cursor='pointer';});
+  map.on('mouseleave','verified-orgs-pins',function(){map.getCanvas().style.cursor='';});
+}
+function toggleVerifiedOrgs(){
+  orgsVisible=!orgsVisible;var vis=orgsVisible?'visible':'none';
+  ['verified-orgs-clusters','verified-orgs-count','verified-orgs-pins','verified-orgs-pins-label'].forEach(function(id){if(map.getLayer(id))map.setLayoutProperty(id,'visibility',vis);});
+  var btn=document.getElementById('orgsToggle');if(btn)btn.style.opacity=orgsVisible?'1':'0.4';
+}
+
 map.on('click',function(e){
   var lat=e.lngLat.lat,lon=e.lngLat.lng;
   if(!fromPt){setFrom(lat,lon,'');}
@@ -319,6 +384,7 @@ var lc=document.getElementById('legend');
 Object.keys(DC).forEach(function(d){
   lc.innerHTML+='<div style="display:flex;align-items:center;gap:6px"><div style="width:9px;height:9px;border-radius:50%;background:'+DC[d]+';box-shadow:0 0 6px '+DC[d]+'"></div><span style="font-size:12px;color:var(--text3);letter-spacing:1px">'+DL[d]+'</span></div>';
 });
+lc.innerHTML+='<div style="display:flex;align-items:center;gap:6px"><div style="width:9px;height:9px;border-radius:50%;background:#1D9E75;box-shadow:0 0 6px #1D9E75;border:1.5px solid #fff"></div><span style="font-size:12px;color:var(--text3);letter-spacing:1px">VERIFIED SITE</span></div>';
 
 }
 </script>
