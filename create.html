@@ -160,6 +160,14 @@ window.copyTxt=function(){navigator.clipboard.writeText(S.txtValue);var b=docume
 window.verify=function(){if(!S.domain||!S.lat)return;var b=document.getElementById('verifyBtn');b.disabled=true;b.innerHTML='<span class="spinner"></span> VERIFYING DNS...';document.getElementById('errorBox').style.display='none';fetch(API+'/gep/domain/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain:S.domain})}).then(function(r){return r.json()}).then(function(d){if(d.success&&d.data.verified){S.result=d.data;document.getElementById('formView').style.display='none';document.getElementById('successView').style.display='block';document.getElementById('successTitle').textContent=d.data.site.title;document.getElementById('successDesc').textContent=d.data.site.description||'';document.getElementById('successDomain').textContent='✓ '+d.data.domain+' — DNS Verified';document.getElementById('successGea').textContent=d.data.gea;}else{var r2=d.data?d.data.reason||d.error:'Failed';document.getElementById('errorBox').textContent=r2;document.getElementById('errorBox').style.display='block';b.disabled=false;b.textContent='VERIFY & CREATE GEPSITE';}}).catch(function(e){document.getElementById('errorBox').textContent='Network error: '+e.message;document.getElementById('errorBox').style.display='block';b.disabled=false;b.textContent='VERIFY & CREATE GEPSITE';});};
 window.viewOnWeb=function(){if(S.result)window.open(API+'/gep/web/lookup?lat='+S.lat+'&lon='+S.lon+'&resolution='+S.res,'_blank');};
 window.copyGea=function(){if(S.result)navigator.clipboard.writeText(S.result.gea);var b=document.querySelectorAll('.success-btn.outline');b[0].textContent='COPIED!';setTimeout(function(){b[0].textContent='COPY GEA'},1500);};
+
+// Auto-fill from URL params (e.g. /create?lat=41.89&lon=12.49)
+var params=new URLSearchParams(window.location.search);
+var pLat=parseFloat(params.get('lat'));
+var pLon=parseFloat(params.get('lon'));
+if(!isNaN(pLat)&&!isNaN(pLon)){
+  map.on('load',function(){setLoc(pLat,pLon);});
+}
 }
 </script>
 </body>
